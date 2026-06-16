@@ -1,11 +1,19 @@
 package com.salah.tracker.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.salah.tracker.data.database.entities.QuranLog
 import com.salah.tracker.data.repository.SalahRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+
+data class Verse(
+    val chapter: Int,
+    val verse: Int,
+    val text: String
+)
 
 class QuranViewModel(private val repository: SalahRepository) : ViewModel() {
 
@@ -65,6 +73,41 @@ class QuranViewModel(private val repository: SalahRepository) : ViewModel() {
     val currentJuzState = currentReadPage.map { page ->
         calculateJuzProgress(page)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), JuzProgressState(1, 0.0, 1, 21))
+
+    // Active Surah verses loaded from assets
+    private val _activeSurahVerses = MutableStateFlow<List<Verse>>(emptyList())
+    val activeSurahVerses: StateFlow<List<Verse>> = _activeSurahVerses.asStateFlow()
+
+    // Loading status
+    private val _isLoadingSurah = MutableStateFlow(false)
+    val isLoadingSurah: StateFlow<Boolean> = _isLoadingSurah.asStateFlow()
+
+    fun loadSurahVerses(context: Context, surahId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isLoadingSurah.value = true
+            try {
+                val jsonString = context.assets.open("quran.json").bufferedReader().use { it.readText() }
+                val jsonObject = org.json.JSONObject(jsonString)
+                val surahArray = jsonObject.optJSONArray(surahId.toString())
+                val versesList = mutableListOf<Verse>()
+                if (surahArray != null) {
+                    for (i in 0 until surahArray.length()) {
+                        val verseObj = surahArray.getJSONObject(i)
+                        val chapter = verseObj.optInt("chapter")
+                        val verseNum = verseObj.optInt("verse")
+                        val text = verseObj.optString("text")
+                        versesList.add(Verse(chapter, verseNum, text))
+                    }
+                }
+                _activeSurahVerses.value = versesList
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _activeSurahVerses.value = emptyList()
+            } finally {
+                _isLoadingSurah.value = false
+            }
+        }
+    }
 
     fun logRecitation(surah: String, startAyah: Int, endAyah: Int, startPage: Int, endPage: Int) {
         viewModelScope.launch {

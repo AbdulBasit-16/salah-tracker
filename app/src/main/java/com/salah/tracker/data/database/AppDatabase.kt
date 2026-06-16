@@ -45,6 +45,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "salah_tracker_database"
                 )
+                .fallbackToDestructiveMigration()
                 .addCallback(object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
@@ -67,7 +68,7 @@ abstract class AppDatabase : RoomDatabase() {
                         } else {
                             // If INSTANCE is not populated yet, we can write a SQL transaction on the db directly
                             // to ensure standard integrity
-                            db.execSQL("INSERT OR IGNORE INTO user_preferences (id, calculationMethod, juristicMethod, latitude, longitude, timezoneOffset, fajrNotifEnabled, dhuhrNotifEnabled, asrNotifEnabled, maghribNotifEnabled, ishaNotifEnabled, missedPrayerRemindersEnabled, missedPrayerWindowMinutes, postSalahRecitationEnabled, postSalahDelayMinutes, lastActiveDate) VALUES (1, 'MWL', 'STANDARD', 21.4225, 39.8262, 3.0, 1, 1, 1, 1, 1, 1, 45, 1, 15, '')")
+                            db.execSQL("INSERT OR IGNORE INTO user_preferences (id, calculationMethod, juristicMethod, themeName, latitude, longitude, timezoneOffset, fajrNotifEnabled, dhuhrNotifEnabled, asrNotifEnabled, maghribNotifEnabled, ishaNotifEnabled, missedPrayerRemindersEnabled, missedPrayerWindowMinutes, postSalahRecitationEnabled, postSalahDelayMinutes, lastActiveDate) VALUES (1, 'MWL', 'STANDARD', 'FOREST_GREEN', 21.4225, 39.8262, 3.0, 1, 1, 1, 1, 1, 1, 45, 1, 15, '')")
                             db.execSQL("INSERT OR IGNORE INTO qaza_counters (prayerName, count) VALUES ('Fajr', 0)")
                             db.execSQL("INSERT OR IGNORE INTO qaza_counters (prayerName, count) VALUES ('Dhuhr', 0)")
                             db.execSQL("INSERT OR IGNORE INTO qaza_counters (prayerName, count) VALUES ('Asr', 0)")

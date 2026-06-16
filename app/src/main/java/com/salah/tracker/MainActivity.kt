@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import com.salah.tracker.data.database.AppDatabase
 import com.salah.tracker.data.repository.SalahRepositoryImpl
@@ -67,7 +69,10 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            SalahTrackerTheme {
+            val prefs by salahViewModel.userPreferences.collectAsState()
+            val themeName = prefs?.themeName ?: "FOREST_GREEN"
+
+            SalahTrackerTheme(themeName = themeName) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

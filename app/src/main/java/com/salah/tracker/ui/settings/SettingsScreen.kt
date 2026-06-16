@@ -176,6 +176,57 @@ fun SettingsScreen(
                 }
             }
 
+            // Theme Configuration Card
+            Text(
+                "App Appearance Theme",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            )
+
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Theme Palette", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                    val themes = listOf(
+                        "FOREST_GREEN" to "Forest Green (Serene)",
+                        "DEEP_BLUE" to "Deep Ocean Blue (Calm)",
+                        "OLIVE_GOLD" to "Olive Gold (Warm)",
+                        "ROYAL_PURPLE" to "Royal Purple (Noble)",
+                        "SLATE_ROSE" to "Slate Rose (Tranquil)"
+                    )
+                    
+                    var expandedTheme by remember { mutableStateOf(false) }
+                    Box {
+                        OutlinedButton(
+                            onClick = { expandedTheme = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(themes.firstOrNull { it.first == prefs.themeName }?.second ?: "Forest Green (Serene)")
+                        }
+                        DropdownMenu(
+                            expanded = expandedTheme,
+                            onDismissRequest = { expandedTheme = false }
+                        ) {
+                            themes.forEach { (key, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label) },
+                                    onClick = {
+                                        viewModel.updateThemeName(key)
+                                        expandedTheme = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             // Calculation parameters Card
             Text(
                 "Calculation Configuration",

@@ -73,4 +73,12 @@ class SettingsViewModel(
             com.salah.tracker.services.AlarmReceiver.rescheduleAlarms(context)
         }
     }
+
+    fun updateThemeName(themeName: String) {
+        viewModelScope.launch {
+            val current = repository.getUserPreferences() ?: UserPreferences()
+            val updated = current.copy(themeName = themeName)
+            repository.saveUserPreferences(updated)
+        }
+    }
 }

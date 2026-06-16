@@ -8,6 +8,7 @@ data class UserPreferences(
     @PrimaryKey val id: Int = 1,
     val calculationMethod: String = "MWL",
     val juristicMethod: String = "STANDARD",
+    val themeName: String = "FOREST_GREEN",
     val latitude: Double = 21.4225, // Default: Makkah
     val longitude: Double = 39.8262,
     val timezoneOffset: Double = 3.0,

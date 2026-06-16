@@ -2,25 +2,84 @@ package com.salah.tracker.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Light Theme Palette
-val LightPrimary = Color(0xFF2E5A44)       // Deep Forest Green
-val LightSecondary = Color(0xFF5A826B)     // Muted Sage Green
-val LightTertiary = Color(0xFF3D5A80)      // Steel Blue
-val LightBackground = Color(0xFFFDFBF7)    // Warm Cream White
-val LightSurface = Color(0xFFF4EFE6)       // Sand / Soft Gold
-val LightText = Color(0xFF1B2E3C)          // Midnight Dark Blue
-
-// Dark Theme Palette
-val DarkPrimary = Color(0xFFA3C6B6)        // Sage Green
-val DarkSecondary = Color(0xFF7E9F8E)      // Muted Sage
-val DarkTertiary = Color(0xFF98C1D9)       // Sky Blue
-val DarkBackground = Color(0xFF0B131A)     // Midnight Dark Blue
-val DarkSurface = Color(0xFF17232B)        // Dark Slate Blue
-val DarkText = Color(0xFFEAEAEA)           // Warm White
-
 // Neutral Tones
 val NeutralGray = Color(0xFF7A889B)
 val NeutralLight = Color(0xFFF0EAD6)       // Eggshell
 val GreenAccent = Color(0xFF388E3C)
 val MissedGray = Color(0xFF8E9AAF)         // Slate/Grey for missed (not red)
 val ExcusedBlue = Color(0xFF5F9EA0)        // Cadet Blue
+
+// Palette 1: Forest Green (Default)
+val ForestPrimaryLight = Color(0xFF2E5A44)
+val ForestSecondaryLight = Color(0xFF5A826B)
+val ForestTertiaryLight = Color(0xFF3D5A80)
+val ForestBackgroundLight = Color(0xFFFDFBF7)
+val ForestSurfaceLight = Color(0xFFF4EFE6)
+val ForestTextLight = Color(0xFF1B2E3C)
+
+val ForestPrimaryDark = Color(0xFFA3C6B6)
+val ForestSecondaryDark = Color(0xFF7E9F8E)
+val ForestTertiaryDark = Color(0xFF98C1D9)
+val ForestBackgroundDark = Color(0xFF0B131A)
+val ForestSurfaceDark = Color(0xFF17232B)
+val ForestTextDark = Color(0xFFEAEAEA)
+
+// Palette 2: Deep Blue
+val BluePrimaryLight = Color(0xFF1B4965)
+val BlueSecondaryLight = Color(0xFF5FA8D3)
+val BlueTertiaryLight = Color(0xFF62B6CB)
+val BlueBackgroundLight = Color(0xFFF8F9FA)
+val BlueSurfaceLight = Color(0xFFE9ECEF)
+val BlueTextLight = Color(0xFF1A303A)
+
+val BluePrimaryDark = Color(0xFF90E0EF)
+val BlueSecondaryDark = Color(0xFF0077B6)
+val BlueTertiaryDark = Color(0xFF0096C7)
+val BlueBackgroundDark = Color(0xFF0B1426)
+val BlueSurfaceDark = Color(0xFF14223C)
+val BlueTextDark = Color(0xFFCAF0F8)
+
+// Palette 3: Olive Gold
+val OlivePrimaryLight = Color(0xFF556B2F) // Olive Drab
+val OliveSecondaryLight = Color(0xFFB5A642) // Gold
+val OliveTertiaryLight = Color(0xFF8B8589)
+val OliveBackgroundLight = Color(0xFFFAF9F6)
+val OliveSurfaceLight = Color(0xFFF5F2EB)
+val OliveTextLight = Color(0xFF2F3E1B)
+
+val OlivePrimaryDark = Color(0xFFC5B358)
+val OliveSecondaryDark = Color(0xFF8FBC8F)
+val OliveTertiaryDark = Color(0xFFD2B48C)
+val OliveBackgroundDark = Color(0xFF181C10)
+val OliveSurfaceDark = Color(0xFF262D1B)
+val OliveTextDark = Color(0xFFECECE0)
+
+// Palette 4: Royal Purple
+val PurplePrimaryLight = Color(0xFF4A2E80)
+val PurpleSecondaryLight = Color(0xFF8A71B5)
+val PurpleTertiaryLight = Color(0xFF9A52A4)
+val PurpleBackgroundLight = Color(0xFFFAF8FF)
+val PurpleSurfaceLight = Color(0xFFEFEAFF)
+val PurpleTextLight = Color(0xFF221144)
+
+val PurplePrimaryDark = Color(0xFFD1BFFF)
+val PurpleSecondaryDark = Color(0xFF553D80)
+val PurpleTertiaryDark = Color(0xFF7A418A)
+val PurpleBackgroundDark = Color(0xFF140C22)
+val PurpleSurfaceDark = Color(0xFF241738)
+val PurpleTextDark = Color(0xFFEFEBFF)
+
+// Palette 5: Slate Rose
+val RosePrimaryLight = Color(0xFF8C4F5A)
+val RoseSecondaryLight = Color(0xFFB57C85)
+val RoseTertiaryLight = Color(0xFF4A6B82)
+val RoseBackgroundLight = Color(0xFFFFF9FA)
+val RoseSurfaceLight = Color(0xFFFCEEEF)
+val RoseTextLight = Color(0xFF3C1F25)
+
+val RosePrimaryDark = Color(0xFFEAA6B1)
+val RoseSecondaryDark = Color(0xFF8C4C56)
+val RoseTertiaryDark = Color(0xFF8FA3B5)
+val RoseBackgroundDark = Color(0xFF261215)
+val RoseSurfaceDark = Color(0xFF3C1D22)
+val RoseTextDark = Color(0xFFFAEBEF)
