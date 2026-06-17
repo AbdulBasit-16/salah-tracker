@@ -9,11 +9,12 @@ import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.salah.tracker.MainActivity
+import com.salah.tracker.R
 
 class NotificationHelper {
 
     companion object {
-        const val PRAYER_CHANNEL_ID = "salah_tracker_prayer_times"
+        const val PRAYER_CHANNEL_ID = "salah_tracker_prayer_adhan"
         const val REMINDER_CHANNEL_ID = "salah_tracker_reminders"
         
         private const val PRAYER_NOTIF_ID_OFFSET = 1000
@@ -23,16 +24,30 @@ class NotificationHelper {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-                // Prayer Times Channel (High Importance, Serene Sound)
+                // Clean up old channel to ensure new sound takes effect
+                try {
+                    manager.deleteNotificationChannel("salah_tracker_prayer_times")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/${R.raw.adhan}")
+                val audioAttributes = android.media.AudioAttributes.Builder()
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                    .build()
+
+                // Prayer Times Channel (High Importance, Custom Adhan Sound)
                 val prayerChannel = NotificationChannel(
                     PRAYER_CHANNEL_ID,
                     "Prayer Time Alerts",
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
-                    description = "Notifications exactly at the start time of Fajr, Dhuhr, Asr, Maghrib, and Isha."
+                    description = "Notifications exactly at the start time of Fajr, Dhuhr, Asr, Maghrib, and Isha with Adhan sound."
                     enableLights(true)
                     enableVibration(true)
                     setShowBadge(true)
+                    setSound(soundUri, audioAttributes)
                 }
 
                 // General Reminders Channel (Default Importance)
@@ -63,7 +78,7 @@ class NotificationHelper {
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
 
-            val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/${R.raw.adhan}")
 
             val builder = NotificationCompat.Builder(context, PRAYER_CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
