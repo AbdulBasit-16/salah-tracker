@@ -157,7 +157,10 @@ fun SettingsScreen(
                         "DEEP_BLUE" to "Deep Ocean Blue (Calm)",
                         "OLIVE_GOLD" to "Olive Gold (Warm)",
                         "ROYAL_PURPLE" to "Royal Purple (Noble)",
-                        "SLATE_ROSE" to "Slate Rose (Tranquil)"
+                        "SLATE_ROSE" to "Slate Rose (Tranquil)",
+                        "ROSE_GOLD" to "Rose Gold (Luxury)",
+                        "TEAL_MINT" to "Teal Mint (Fresh)",
+                        "MIDNIGHT_SUNSET" to "Midnight Sunset (Vibrant)"
                     )
                     
                     var expandedTheme by remember { mutableStateOf(false) }
@@ -439,6 +442,59 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            // Islamic Calendar Settings Card
+            Text(
+                "Islamic Calendar Settings",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            )
+
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Hijri Adjustment (Days)", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                    
+                    val adjustments = listOf(
+                        -2 to "-2 Days",
+                        -1 to "-1 Day",
+                        0 to "Standard (0)",
+                        1 to "+1 Day",
+                        2 to "+2 Days"
+                    )
+                    
+                    var expandedHijri by remember { mutableStateOf(false) }
+                    Box {
+                        OutlinedButton(
+                            onClick = { expandedHijri = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            val currentText = adjustments.firstOrNull { it.first == prefs.hijriAdjustment }?.second ?: "Standard (0)"
+                            Text(currentText)
+                        }
+                        DropdownMenu(
+                            expanded = expandedHijri,
+                            onDismissRequest = { expandedHijri = false }
+                        ) {
+                            adjustments.forEach { (adj, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label) },
+                                    onClick = {
+                                        viewModel.updateHijriAdjustment(adj)
+                                        expandedHijri = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -483,16 +539,26 @@ private fun detectLocation(context: Context, onLocationDetected: (Double, Double
         if (location != null) {
             val tzOffset = TimeZone.getDefault().rawOffset / 3600000.0
             val geocoder = android.location.Geocoder(context, java.util.Locale.getDefault())
-            var cityName = "Detected Location"
+            var cityName = ""
             try {
                 @Suppress("DEPRECATION")
                 val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
                 val address = addresses?.firstOrNull()
                 if (address != null) {
-                    cityName = address.locality ?: address.subAdminArea ?: address.adminArea ?: address.countryName ?: "Detected Location"
+                    cityName = address.subLocality ?: address.featureName ?: address.locality ?: address.subAdminArea ?: address.adminArea ?: ""
                 }
             } catch (e: Exception) {
-                cityName = String.format("Location (%.3f, %.3f)", location.latitude, location.longitude)
+                e.printStackTrace()
+            }
+
+            // Fallback: If Geocoder failed or yielded empty, find the closest Pakistan city preset
+            if (cityName.isEmpty() || cityName == "Detected Location") {
+                val closest = findClosestPakistanCity(location.latitude, location.longitude)
+                cityName = if (closest != null) {
+                    "$closest (Auto-Detected)"
+                } else {
+                    String.format("Location (%.3f, %.3f)", location.latitude, location.longitude)
+                }
             }
             onLocationDetected(location.latitude, location.longitude, tzOffset, cityName)
         } else {
@@ -505,4 +571,28 @@ private fun detectLocation(context: Context, onLocationDetected: (Double, Double
     } catch (e: Exception) {
         Toast.makeText(context, "Location detection failed: ${e.message}", Toast.LENGTH_SHORT).show()
     }
+}
+
+private fun findClosestPakistanCity(latitude: Double, longitude: Double): String? {
+    var closestCity: String? = null
+    var minDistance = Double.MAX_VALUE
+    for (city in com.salah.tracker.data.model.PakistanCities.cities) {
+        val dist = calculateDistance(latitude, longitude, city.latitude, city.longitude)
+        if (dist < minDistance) {
+            minDistance = dist
+            closestCity = city.name
+        }
+    }
+    return if (minDistance < 150.0) closestCity else null
+}
+
+private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    val r = 6371.0 // Earth radius in km
+    val dLat = Math.toRadians(lat2 - lat1)
+    val dLon = Math.toRadians(lon2 - lon1)
+    val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2)
+    val c = 2 * Math.asin(Math.sqrt(a))
+    return r * c
 }

@@ -124,6 +124,72 @@ private val RoseDark = darkColorScheme(
     onSurface = RoseTextDark
 )
 
+// 6. Rose Gold
+private val RoseGoldLight = lightColorScheme(
+    primary = RoseGoldPrimaryLight,
+    secondary = RoseGoldSecondaryLight,
+    tertiary = RoseGoldTertiaryLight,
+    background = RoseGoldBackgroundLight,
+    surface = RoseGoldSurfaceLight,
+    onPrimary = RoseGoldBackgroundLight,
+    onBackground = RoseGoldTextLight,
+    onSurface = RoseGoldTextLight
+)
+private val RoseGoldDark = darkColorScheme(
+    primary = RoseGoldPrimaryDark,
+    secondary = RoseGoldSecondaryDark,
+    tertiary = RoseGoldTertiaryDark,
+    background = RoseGoldBackgroundDark,
+    surface = RoseGoldSurfaceDark,
+    onPrimary = RoseGoldBackgroundDark,
+    onBackground = RoseGoldTextDark,
+    onSurface = RoseGoldTextDark
+)
+
+// 7. Teal Mint
+private val TealLight = lightColorScheme(
+    primary = TealPrimaryLight,
+    secondary = TealSecondaryLight,
+    tertiary = TealTertiaryLight,
+    background = TealBackgroundLight,
+    surface = TealSurfaceLight,
+    onPrimary = TealBackgroundLight,
+    onBackground = TealTextLight,
+    onSurface = TealTextLight
+)
+private val TealDark = darkColorScheme(
+    primary = TealPrimaryDark,
+    secondary = TealSecondaryDark,
+    tertiary = TealTertiaryDark,
+    background = TealBackgroundDark,
+    surface = TealSurfaceDark,
+    onPrimary = TealBackgroundDark,
+    onBackground = TealTextDark,
+    onSurface = TealTextDark
+)
+
+// 8. Midnight Sunset
+private val SunsetLight = lightColorScheme(
+    primary = SunsetPrimaryLight,
+    secondary = SunsetSecondaryLight,
+    tertiary = SunsetTertiaryLight,
+    background = SunsetBackgroundLight,
+    surface = SunsetSurfaceLight,
+    onPrimary = SunsetBackgroundLight,
+    onBackground = SunsetTextLight,
+    onSurface = SunsetTextLight
+)
+private val SunsetDark = darkColorScheme(
+    primary = SunsetPrimaryDark,
+    secondary = SunsetSecondaryDark,
+    tertiary = SunsetTertiaryDark,
+    background = SunsetBackgroundDark,
+    surface = SunsetSurfaceDark,
+    onPrimary = SunsetBackgroundDark,
+    onBackground = SunsetTextDark,
+    onSurface = SunsetTextDark
+)
+
 @Composable
 fun SalahTrackerTheme(
     themeName: String = "FOREST_GREEN",
@@ -135,6 +201,9 @@ fun SalahTrackerTheme(
         "OLIVE_GOLD" -> if (darkTheme) OliveDark else OliveLight
         "ROYAL_PURPLE" -> if (darkTheme) PurpleDark else PurpleLight
         "SLATE_ROSE" -> if (darkTheme) RoseDark else RoseLight
+        "ROSE_GOLD" -> if (darkTheme) RoseGoldDark else RoseGoldLight
+        "TEAL_MINT" -> if (darkTheme) TealDark else TealLight
+        "MIDNIGHT_SUNSET" -> if (darkTheme) SunsetDark else SunsetLight
         else -> if (darkTheme) ForestDark else ForestLight
     }
 

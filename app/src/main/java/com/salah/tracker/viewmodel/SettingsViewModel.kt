@@ -108,4 +108,12 @@ class SettingsViewModel(
             com.salah.tracker.services.AlarmReceiver.rescheduleAlarms(context)
         }
     }
+
+    fun updateHijriAdjustment(adjustment: Int) {
+        viewModelScope.launch {
+            val current = repository.getUserPreferences() ?: UserPreferences()
+            val updated = current.copy(hijriAdjustment = adjustment)
+            repository.saveUserPreferences(updated)
+        }
+    }
 }

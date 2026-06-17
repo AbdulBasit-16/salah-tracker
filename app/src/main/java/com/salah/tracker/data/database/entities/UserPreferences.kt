@@ -25,5 +25,6 @@ data class UserPreferences(
     val selectedCity: String = "Custom",
     val quranScript: String = "UTHMANI",
     val showEnglishTranslation: Boolean = true,
-    val showUrduTranslation: Boolean = true
+    val showUrduTranslation: Boolean = true,
+    val hijriAdjustment: Int = 0
 )

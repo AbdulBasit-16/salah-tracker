@@ -192,15 +192,39 @@ fun DashboardScreen(
                     }
                 }
 
-                // Date Label
-                Text(
-                    text = currentDate.format(dateFormater),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontWeight = FontWeight.Medium
-                    ),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                // Date & Islamic Calendar Labels inside a beautiful premium container
+                Column(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = currentDate.format(dateFormater),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                    
+                    // Islamic Calendar Date
+                    val hijriDateStr = getHijriDateString(prefs?.hijriAdjustment ?: 0)
+                    if (hijriDateStr.isNotEmpty()) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                            modifier = Modifier.padding(top = 2.dp)
+                        ) {
+                            Text(
+                                text = hijriDateStr,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
 
                 // Daily Checklist Obligatory Prayers Section
                 Text(
@@ -357,6 +381,8 @@ fun CustomAnalogClock(
     modifier: Modifier = Modifier
 ) {
     var time by remember { mutableStateOf(LocalTime.now()) }
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val surfaceColor = MaterialTheme.colorScheme.surface
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -369,14 +395,40 @@ fun CustomAnalogClock(
         val center = Offset(size.width / 2, size.height / 2)
         val radius = size.width / 2
 
-        // Outer dark background circle
+        // 1. Draw outer circle with premium sweeping/radial gradient
+        val brush = androidx.compose.ui.graphics.Brush.radialGradient(
+            colors = listOf(surfaceColor, Color(0xFF1E1E1E)),
+            center = center,
+            radius = radius
+        )
         drawCircle(
-            color = Color(0xFF181818),
+            brush = brush,
             radius = radius,
             center = center
         )
 
-        // Outer progress arc showing elapsed prayer duration
+        // 2. Draw perimeter minute ticks for an instrument-like premium dial
+        for (angle in 0 until 360 step 6) {
+            val isMajor = angle % 30 == 0
+            val tickLength = if (isMajor) 12.dp.toPx() else 6.dp.toPx()
+            val tickWidth = if (isMajor) 3.dp.toPx() else 1.dp.toPx()
+            val color = if (isMajor) primaryColor else Color.White.copy(alpha = 0.25f)
+            
+            val angleRad = Math.toRadians(angle.toDouble())
+            val startX = center.x + (radius - tickLength) * cos(angleRad).toFloat()
+            val startY = center.y + (radius - tickLength) * sin(angleRad).toFloat()
+            val endX = center.x + radius * cos(angleRad).toFloat()
+            val endY = center.y + radius * sin(angleRad).toFloat()
+            
+            drawLine(
+                color = color,
+                start = Offset(startX, startY),
+                end = Offset(endX, endY),
+                strokeWidth = tickWidth
+            )
+        }
+
+        // 3. Draw outer progress arc showing elapsed prayer duration
         if (currentStart != null) {
             val startHour = currentStart.hour + currentStart.minute / 60.0 + currentStart.second / 3600.0
             val nowHour = time.hour + time.minute / 60.0 + time.second / 3600.0
@@ -387,24 +439,24 @@ fun CustomAnalogClock(
             if (sweepAngle < 0) sweepAngle += 360f
 
             drawArc(
-                color = Color(0xFF3A9AD9),
+                color = primaryColor,
                 startAngle = startAngle,
                 sweepAngle = sweepAngle,
                 useCenter = false,
-                style = Stroke(width = 6.dp.toPx()),
+                style = Stroke(width = 5.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round),
                 size = size,
                 topLeft = Offset.Zero
             )
         }
 
-        // Inner dial circle
+        // 4. Draw inner dial circle
         drawCircle(
-            color = Color(0xFF2C2C2C),
-            radius = radius * 0.82f,
+            color = Color(0xFF161616),
+            radius = radius * 0.76f,
             center = center
         )
 
-        // Draw numbers
+        // 5. Draw numbers
         val paint = android.graphics.Paint().apply {
             color = android.graphics.Color.WHITE
             textSize = 28f
@@ -415,54 +467,59 @@ fun CustomAnalogClock(
         for (i in 1..12) {
             val angleDeg = i * 30.0 - 90.0
             val angleRad = Math.toRadians(angleDeg)
-            val tx = center.x + (radius * 0.68f) * cos(angleRad).toFloat()
-            val ty = center.y + (radius * 0.68f) * sin(angleRad).toFloat() + 10f
+            val tx = center.x + (radius * 0.62f) * cos(angleRad).toFloat()
+            val ty = center.y + (radius * 0.62f) * sin(angleRad).toFloat() + 10f
             drawContext.canvas.nativeCanvas.drawText(i.toString(), tx, ty, paint)
         }
 
-        // Hand lengths
-        val hourHandLength = radius * 0.45f
-        val minuteHandLength = radius * 0.65f
-        val secondHandLength = radius * 0.72f
+        // 6. Hand lengths
+        val hourHandLength = radius * 0.42f
+        val minuteHandLength = radius * 0.60f
+        val secondHandLength = radius * 0.68f
 
         val hourAngle = ((time.hour % 12 + time.minute / 60.0) * 30.0 - 90.0).toFloat()
         val minuteAngle = (time.minute * 6.0 - 90.0).toFloat()
         val secondAngle = (time.second * 6.0 - 90.0).toFloat()
 
-        // Hour hand
+        // Hour hand: White, thick, with circle cutout near the tip
         rotate(degrees = hourAngle, pivot = center) {
             drawLine(
                 color = Color.White,
                 start = center,
-                end = Offset(center.x + hourHandLength, center.y),
-                strokeWidth = 6.dp.toPx()
+                end = Offset(center.x + hourHandLength - 10f, center.y),
+                strokeWidth = 5.dp.toPx()
+            )
+            drawCircle(
+                color = Color.White,
+                radius = 6.dp.toPx(),
+                center = Offset(center.x + hourHandLength, center.y)
             )
         }
 
-        // Minute hand
+        // Minute hand: Sleek, colored, matching theme primary
         rotate(degrees = minuteAngle, pivot = center) {
             drawLine(
-                color = Color(0xFF3A9AD9),
+                color = primaryColor,
                 start = center,
                 end = Offset(center.x + minuteHandLength, center.y),
-                strokeWidth = 4.dp.toPx()
+                strokeWidth = 3.5f.dp.toPx()
             )
         }
 
-        // Second hand
+        // Second hand: Accent, very thin, extending slightly backward
         rotate(degrees = secondAngle, pivot = center) {
             drawLine(
-                color = Color.White.copy(alpha = 0.8f),
-                start = center,
+                color = primaryColor.copy(alpha = 0.8f),
+                start = Offset(center.x - 15f, center.y),
                 end = Offset(center.x + secondHandLength, center.y),
-                strokeWidth = 2.dp.toPx()
+                strokeWidth = 1.5f.dp.toPx()
             )
         }
 
         // Pivot point
         drawCircle(
             color = Color.White,
-            radius = 6.dp.toPx(),
+            radius = 5.dp.toPx(),
             center = center
         )
     }
@@ -679,3 +736,17 @@ fun StatusSelectorDialog(
 }
 
 data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+
+private fun getHijriDateString(adjustmentDays: Int): String {
+    return try {
+        val adjustedDate = java.time.LocalDate.now().plusDays(adjustmentDays.toLong())
+        val hijriDate = java.time.chrono.HijrahDate.from(adjustedDate)
+        
+        val formatter = java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy")
+        val formatted = hijriDate.format(formatter)
+        "🌙 $formatted AH"
+    } catch (e: Exception) {
+        e.printStackTrace()
+        ""
+    }
+}
