@@ -161,7 +161,10 @@ fun SettingsScreen(
                         "SLATE_ROSE" to "Slate Rose (Tranquil)",
                         "ROSE_GOLD" to "Rose Gold (Luxury)",
                         "TEAL_MINT" to "Teal Mint (Fresh)",
-                        "MIDNIGHT_SUNSET" to "Midnight Sunset (Vibrant)"
+                        "MIDNIGHT_SUNSET" to "Midnight Sunset (Vibrant)",
+                        "OCEAN_BREEZE" to "Ocean Breeze (Soothing)",
+                        "WARM_TERRACOTTA" to "Warm Terracotta (Cozy)",
+                        "NIGHT_NEON" to "Night Neon (Cyberpunk)"
                     )
                     
                     var expandedTheme by remember { mutableStateOf(false) }

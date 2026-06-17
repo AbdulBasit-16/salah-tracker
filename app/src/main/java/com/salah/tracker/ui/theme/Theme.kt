@@ -190,6 +190,72 @@ private val SunsetDark = darkColorScheme(
     onSurface = SunsetTextDark
 )
 
+// 9. Ocean Breeze
+private val OceanLight = lightColorScheme(
+    primary = OceanPrimaryLight,
+    secondary = OceanSecondaryLight,
+    tertiary = OceanTertiaryLight,
+    background = OceanBackgroundLight,
+    surface = OceanSurfaceLight,
+    onPrimary = OceanBackgroundLight,
+    onBackground = OceanTextLight,
+    onSurface = OceanTextLight
+)
+private val OceanDark = darkColorScheme(
+    primary = OceanPrimaryDark,
+    secondary = OceanSecondaryDark,
+    tertiary = OceanTertiaryDark,
+    background = OceanBackgroundDark,
+    surface = OceanSurfaceDark,
+    onPrimary = OceanBackgroundDark,
+    onBackground = OceanTextDark,
+    onSurface = OceanTextDark
+)
+
+// 10. Warm Terracotta
+private val TerracottaLight = lightColorScheme(
+    primary = TerracottaPrimaryLight,
+    secondary = TerracottaSecondaryLight,
+    tertiary = TerracottaTertiaryLight,
+    background = TerracottaBackgroundLight,
+    surface = TerracottaSurfaceLight,
+    onPrimary = TerracottaBackgroundLight,
+    onBackground = TerracottaTextLight,
+    onSurface = TerracottaTextLight
+)
+private val TerracottaDark = darkColorScheme(
+    primary = TerracottaPrimaryDark,
+    secondary = TerracottaSecondaryDark,
+    tertiary = TerracottaTertiaryDark,
+    background = TerracottaBackgroundDark,
+    surface = TerracottaSurfaceDark,
+    onPrimary = TerracottaBackgroundDark,
+    onBackground = TerracottaTextDark,
+    onSurface = TerracottaTextDark
+)
+
+// 11. Night Neon
+private val NeonLight = lightColorScheme(
+    primary = NeonPrimaryLight,
+    secondary = NeonSecondaryLight,
+    tertiary = NeonTertiaryLight,
+    background = NeonBackgroundLight,
+    surface = NeonSurfaceLight,
+    onPrimary = NeonBackgroundLight,
+    onBackground = NeonTextLight,
+    onSurface = NeonTextLight
+)
+private val NeonDark = darkColorScheme(
+    primary = NeonPrimaryDark,
+    secondary = NeonSecondaryDark,
+    tertiary = NeonTertiaryDark,
+    background = NeonBackgroundDark,
+    surface = NeonSurfaceDark,
+    onPrimary = NeonBackgroundDark,
+    onBackground = NeonTextDark,
+    onSurface = NeonTextDark
+)
+
 @Composable
 fun SalahTrackerTheme(
     themeName: String = "FOREST_GREEN",
@@ -204,6 +270,9 @@ fun SalahTrackerTheme(
         "ROSE_GOLD" -> if (darkTheme) RoseGoldDark else RoseGoldLight
         "TEAL_MINT" -> if (darkTheme) TealDark else TealLight
         "MIDNIGHT_SUNSET" -> if (darkTheme) SunsetDark else SunsetLight
+        "OCEAN_BREEZE" -> if (darkTheme) OceanDark else OceanLight
+        "WARM_TERRACOTTA" -> if (darkTheme) TerracottaDark else TerracottaLight
+        "NIGHT_NEON" -> if (darkTheme) NeonDark else NeonLight
         else -> if (darkTheme) ForestDark else ForestLight
     }
 

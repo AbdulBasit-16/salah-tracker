@@ -128,3 +128,48 @@ val SunsetTertiaryDark = Color(0xFFFFA07A)
 val SunsetBackgroundDark = Color(0xFF13091F)
 val SunsetSurfaceDark = Color(0xFF26133C)
 val SunsetTextDark = Color(0xFFFFF1EB)
+
+// Palette 9: Ocean Breeze
+val OceanPrimaryLight = Color(0xFF0077B6)
+val OceanSecondaryLight = Color(0xFF0096C7)
+val OceanTertiaryLight = Color(0xFF03045E)
+val OceanBackgroundLight = Color(0xFFF0F8FF)
+val OceanSurfaceLight = Color(0xFFE0F0FA)
+val OceanTextLight = Color(0xFF03045E)
+
+val OceanPrimaryDark = Color(0xFF90E0EF)
+val OceanSecondaryDark = Color(0xFF0077B6)
+val OceanTertiaryDark = Color(0xFF0096C7)
+val OceanBackgroundDark = Color(0xFF03045E)
+val OceanSurfaceDark = Color(0xFF0A2540)
+val OceanTextDark = Color(0xFFE0FAFF)
+
+// Palette 10: Warm Terracotta
+val TerracottaPrimaryLight = Color(0xFFC05C46)
+val TerracottaSecondaryLight = Color(0xFFD68A78)
+val TerracottaTertiaryLight = Color(0xFF6E3E34)
+val TerracottaBackgroundLight = Color(0xFFFAF6F0)
+val TerracottaSurfaceLight = Color(0xFFF0E5DB)
+val TerracottaTextLight = Color(0xFF4A231C)
+
+val TerracottaPrimaryDark = Color(0xFFE89A88)
+val TerracottaSecondaryDark = Color(0xFF803A2B)
+val TerracottaTertiaryDark = Color(0xFFAA5644)
+val TerracottaBackgroundDark = Color(0xFF1C1311)
+val TerracottaSurfaceDark = Color(0xFF2E201E)
+val TerracottaTextDark = Color(0xFFFCEFEA)
+
+// Palette 11: Night Neon
+val NeonPrimaryLight = Color(0xFFD00070)
+val NeonSecondaryLight = Color(0xFF800080)
+val NeonTertiaryLight = Color(0xFF00A0A0)
+val NeonBackgroundLight = Color(0xFFFFF0F5)
+val NeonSurfaceLight = Color(0xFFFCE4EC)
+val NeonTextLight = Color(0xFF4A0020)
+
+val NeonPrimaryDark = Color(0xFFFF1493)
+val NeonSecondaryDark = Color(0xFF8A2BE2)
+val NeonTertiaryDark = Color(0xFF00FFFF)
+val NeonBackgroundDark = Color(0xFF000000)
+val NeonSurfaceDark = Color(0xFF121212)
+val NeonTextDark = Color(0xFFFFF0F5)
