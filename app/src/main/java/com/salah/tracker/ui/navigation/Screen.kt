@@ -5,4 +5,5 @@ sealed class Screen(val route: String) {
     object Insights : Screen("insights")
     object QuranHub : Screen("quran")
     object Settings : Screen("settings")
+    object Qibla : Screen("qibla")
 }

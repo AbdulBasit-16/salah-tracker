@@ -39,18 +39,6 @@ fun SettingsScreen(
     val prefs = prefsOrNull ?: UserPreferences()
     val context = LocalContext.current
 
-    // Coordinates inputs
-    var latText by remember { mutableStateOf("") }
-    var lngText by remember { mutableStateOf("") }
-    var tzText by remember { mutableStateOf("") }
-
-    // Sync input states with preferences on load
-    LaunchedEffect(prefs) {
-        latText = prefs.latitude.toString()
-        lngText = prefs.longitude.toString()
-        tzText = prefs.timezoneOffset.toString()
-    }
-
     // Permission launcher for location detection
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -58,9 +46,9 @@ fun SettingsScreen(
         val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
         val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         if (fineGranted || coarseGranted) {
-            detectLocation(context) { lat, lng, tz ->
-                viewModel.updateCoordinates(lat, lng, tz)
-                Toast.makeText(context, "Location updated successfully!", Toast.LENGTH_SHORT).show()
+            detectLocation(context) { lat, lng, tz, cityName ->
+                viewModel.updateSelectedCity(cityName, lat, lng, tz)
+                Toast.makeText(context, "Location updated: $cityName", Toast.LENGTH_SHORT).show()
             }
         } else {
             Toast.makeText(context, "Location permission denied.", Toast.LENGTH_SHORT).show()
@@ -95,7 +83,7 @@ fun SettingsScreen(
         ) {
             // Location Settings Card
             Text(
-                "Location & Coordinates",
+                "Location Settings",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             )
 
@@ -106,116 +94,44 @@ fun SettingsScreen(
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Pakistan City Dropdown Selector
-                    var expandedCity by remember { mutableStateOf(false) }
-                    Column {
-                        Text("Pakistan City Preset", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                        Spacer(Modifier.height(4.dp))
-                        Box {
-                            OutlinedButton(
-                                onClick = { expandedCity = true },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(if (prefs.selectedCity.isEmpty()) "Select City (or Custom)" else prefs.selectedCity)
-                            }
-                            DropdownMenu(
-                                expanded = expandedCity,
-                                onDismissRequest = { expandedCity = false }
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Custom / Auto-Detected") },
-                                    onClick = {
-                                        viewModel.updateSelectedCity("Custom", prefs.latitude, prefs.longitude, prefs.timezoneOffset)
-                                        expandedCity = false
-                                    }
-                                )
-                                PakistanCities.cities.forEach { city ->
-                                    DropdownMenuItem(
-                                        text = { Text(city.name) },
-                                        onClick = {
-                                            viewModel.updateSelectedCity(city.name, city.latitude, city.longitude, city.timezoneOffset)
-                                            latText = city.latitude.toString()
-                                            lngText = city.longitude.toString()
-                                            tzText = city.timezoneOffset.toString()
-                                            expandedCity = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(4.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        OutlinedTextField(
-                            value = latText,
-                            onValueChange = { latText = it },
-                            label = { Text("Latitude") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
+                        Text(
+                            text = if (prefs.selectedCity.isEmpty()) "Location: Unknown" else "Location: ${prefs.selectedCity}",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                         )
-                        OutlinedTextField(
-                            value = lngText,
-                            onValueChange = { lngText = it },
-                            label = { Text("Longitude") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
+                        Text(
+                            text = String.format("Coordinates: %.4f, %.4f", prefs.latitude, prefs.longitude),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                        Text(
+                            text = String.format("Timezone Offset: GMT%+.1f", prefs.timezoneOffset),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
                     }
 
-                    OutlinedTextField(
-                        value = tzText,
-                        onValueChange = { tzText = it },
-                        label = { Text("Timezone Offset (Hours)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    Button(
+                        onClick = {
+                            locationPermissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                )
+                            )
+                        },
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Button(
-                            onClick = {
-                                val lat = latText.toDoubleOrNull()
-                                val lng = lngText.toDoubleOrNull()
-                                val tz = tzText.toDoubleOrNull()
-                                if (lat != null && lng != null && tz != null) {
-                                    viewModel.updateCoordinates(lat, lng, tz)
-                                    Toast.makeText(context, "Coordinates saved!", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Toast.makeText(context, "Please enter valid numbers.", Toast.LENGTH_SHORT).show()
-                                }
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Save Location")
-                        }
-
-                        OutlinedButton(
-                            onClick = {
-                                locationPermissionLauncher.launch(
-                                    arrayOf(
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION
-                                    )
-                                )
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.MyLocation, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text("Auto-Detect")
-                        }
+                        Icon(Icons.Default.MyLocation, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Auto-Detect Location")
                     }
                 }
             }
@@ -556,7 +472,7 @@ fun ToggleSettingRow(
     }
 }
 
-private fun detectLocation(context: Context, onLocationDetected: (Double, Double, Double) -> Unit) {
+private fun detectLocation(context: Context, onLocationDetected: (Double, Double, Double, String) -> Unit) {
     try {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         
@@ -566,12 +482,23 @@ private fun detectLocation(context: Context, onLocationDetected: (Double, Double
             
         if (location != null) {
             val tzOffset = TimeZone.getDefault().rawOffset / 3600000.0
-            onLocationDetected(location.latitude, location.longitude, tzOffset)
+            val geocoder = android.location.Geocoder(context, java.util.Locale.getDefault())
+            var cityName = "Detected Location"
+            try {
+                @Suppress("DEPRECATION")
+                val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                val address = addresses?.firstOrNull()
+                if (address != null) {
+                    cityName = address.locality ?: address.subAdminArea ?: address.adminArea ?: address.countryName ?: "Detected Location"
+                }
+            } catch (e: Exception) {
+                cityName = String.format("Location (%.3f, %.3f)", location.latitude, location.longitude)
+            }
+            onLocationDetected(location.latitude, location.longitude, tzOffset, cityName)
         } else {
-            // Default fallback if no last known location is saved on device
-            Toast.makeText(context, "Unable to get GPS lock. Setting default (Makkah).", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "GPS lock unavailable. Using default (Makkah).", Toast.LENGTH_LONG).show()
             val tzOffset = TimeZone.getDefault().rawOffset / 3600000.0
-            onLocationDetected(21.4225, 39.8262, tzOffset)
+            onLocationDetected(21.4225, 39.8262, tzOffset, "Makkah")
         }
     } catch (e: SecurityException) {
         Toast.makeText(context, "Location permission missing.", Toast.LENGTH_SHORT).show()
