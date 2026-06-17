@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.salah.tracker.data.database.entities.PrayerLog
+import androidx.compose.ui.platform.LocalContext
 import com.salah.tracker.ui.theme.ExcusedBlue
 import com.salah.tracker.ui.theme.MissedGray
 import com.salah.tracker.viewmodel.SalahViewModel
@@ -263,8 +264,12 @@ fun PrayerCheckRow(
     time: LocalTime?,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
     val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
     val timeStr = time?.format(timeFormatter) ?: ""
+
+    val isObligatory = log.prayerName in listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+    val isLocked = isObligatory && time != null && LocalTime.now().isBefore(time)
 
     // Micro animation on press feedback
     var clicked by remember { mutableStateOf(false) }
@@ -275,9 +280,17 @@ fun PrayerCheckRow(
             .fillMaxWidth()
             .scale(scale)
             .clickable { 
-                clicked = true
-                onClick()
-                clicked = false
+                if (isLocked) {
+                    android.widget.Toast.makeText(
+                        context,
+                        "Marking is only available after ${log.prayerName} time begins.",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    clicked = true
+                    onClick()
+                    clicked = false
+                }
             }
             .padding(vertical = 12.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -287,14 +300,14 @@ fun PrayerCheckRow(
                 log.prayerName,
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = if (isLocked) MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onBackground
                 )
             )
             if (timeStr.isNotEmpty()) {
                 Text(
                     timeStr,
                     style = MaterialTheme.typography.bodySmall.copy(
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = if (isLocked) 0.3f else 0.6f)
                     )
                 )
             }
@@ -303,37 +316,46 @@ fun PrayerCheckRow(
         Spacer(Modifier.width(16.dp))
 
         // Status badge
-        val (badgeColor, textColor, textVal, icon) = when (log.status) {
-            "Offered On-Time" -> Quadruple(
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                MaterialTheme.colorScheme.primary,
-                "On-Time",
-                Icons.Default.DoneAll
-            )
-            "Offered Late" -> Quadruple(
-                MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
-                MaterialTheme.colorScheme.secondary,
-                "Late",
-                Icons.Default.Done
-            )
-            "Missed/Qaza" -> Quadruple(
-                MissedGray.copy(alpha = 0.15f),
-                MissedGray,
-                "Qaza",
-                Icons.Default.Close
-            )
-            "Excused" -> Quadruple(
-                ExcusedBlue.copy(alpha = 0.15f),
-                ExcusedBlue,
-                "Excused",
-                Icons.Default.Block
-            )
-            else -> Quadruple(
-                MaterialTheme.colorScheme.background,
+        val (badgeColor, textColor, textVal, icon) = if (isLocked) {
+            Quadruple(
+                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f),
                 MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
-                "Pending",
-                Icons.Default.AccessTime
+                "Upcoming",
+                Icons.Default.Lock
             )
+        } else {
+            when (log.status) {
+                "Offered On-Time" -> Quadruple(
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                    MaterialTheme.colorScheme.primary,
+                    "On-Time",
+                    Icons.Default.DoneAll
+                )
+                "Offered Late" -> Quadruple(
+                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
+                    MaterialTheme.colorScheme.secondary,
+                    "Late",
+                    Icons.Default.Done
+                )
+                "Missed/Qaza" -> Quadruple(
+                    MissedGray.copy(alpha = 0.15f),
+                    MissedGray,
+                    "Qaza",
+                    Icons.Default.Close
+                )
+                "Excused" -> Quadruple(
+                    ExcusedBlue.copy(alpha = 0.15f),
+                    ExcusedBlue,
+                    "Excused",
+                    Icons.Default.Block
+                )
+                else -> Quadruple(
+                    MaterialTheme.colorScheme.background,
+                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
+                    "Pending",
+                    Icons.Default.AccessTime
+                )
+            }
         }
 
         Surface(

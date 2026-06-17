@@ -400,6 +400,15 @@ fun SettingsScreen(
                     Column {
                         Text("Calculation Method", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
                         Spacer(Modifier.height(4.dp))
+                        val methodLabels = mapOf(
+                            "MWL" to "Muslim World League (MWL)",
+                            "ISNA" to "Islamic Society of North America (ISNA)",
+                            "EGYPT" to "Egyptian General Authority of Survey",
+                            "KARACHI" to "University of Islamic Sciences, Karachi",
+                            "UMM_AL_QURA" to "Umm Al-Qura University, Makkah",
+                            "GULF" to "Gulf Region",
+                            "TEHRAN" to "Institute of Geophysics, University of Tehran"
+                        )
                         val methods = listOf("MWL", "ISNA", "EGYPT", "KARACHI", "UMM_AL_QURA", "GULF", "TEHRAN")
                         
                         var expandedMethod by remember { mutableStateOf(false) }
@@ -409,7 +418,7 @@ fun SettingsScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
-                                Text(prefs.calculationMethod)
+                                Text(methodLabels[prefs.calculationMethod] ?: prefs.calculationMethod)
                             }
                             DropdownMenu(
                                 expanded = expandedMethod,
@@ -417,7 +426,7 @@ fun SettingsScreen(
                             ) {
                                 methods.forEach { m ->
                                     DropdownMenuItem(
-                                        text = { Text(m) },
+                                        text = { Text(methodLabels[m] ?: m) },
                                         onClick = {
                                             viewModel.updateCalculationMethod(m)
                                             expandedMethod = false

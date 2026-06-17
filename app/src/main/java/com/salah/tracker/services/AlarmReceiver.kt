@@ -48,9 +48,9 @@ class AlarmReceiver : BroadcastReceiver() {
                             NotificationHelper.sendPrayerNotification(context, prayerName)
                         }
 
-                        // 2. Schedule Missed check (default: 45 minutes later)
+                        // 2. Schedule Missed check (30 minutes before next prayer)
                         if (prefs.missedPrayerRemindersEnabled) {
-                            scheduleMissedCheckAlarm(context, prayerName, dateStr, prefs.missedPrayerWindowMinutes)
+                            scheduleMissedCheck30MinsBeforeNext(context, prayerName, dateStr, prefs)
                         }
                     }
 
@@ -200,21 +200,72 @@ class AlarmReceiver : BroadcastReceiver() {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
         }
 
-        private fun scheduleMissedCheckAlarm(context: Context, prayerName: String, dateStr: String, delayMinutes: Int) {
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val intent = Intent(context, AlarmReceiver::class.java).apply {
-                putExtra(EXTRA_ACTION_TYPE, ACTION_MISSED_CHECK)
-                putExtra(EXTRA_PRAYER_NAME, prayerName)
-                putExtra(EXTRA_DATE, dateStr)
+        private fun scheduleMissedCheck30MinsBeforeNext(
+            context: Context,
+            currentPrayerName: String,
+            currentDateStr: String,
+            prefs: UserPreferences
+        ) {
+            try {
+                val currentDate = LocalDate.parse(currentDateStr)
+                val (nextPrayerName, nextDate) = when (currentPrayerName) {
+                    "Fajr" -> "Dhuhr" to currentDate
+                    "Dhuhr" -> "Asr" to currentDate
+                    "Asr" -> "Maghrib" to currentDate
+                    "Maghrib" -> "Isha" to currentDate
+                    "Isha" -> "Fajr" to currentDate.plusDays(1)
+                    else -> return
+                }
+
+                val nextTimes = calculateTimes(prefs, nextDate)
+                val nextLocalTime = when (nextPrayerName) {
+                    "Fajr" -> nextTimes.fajr
+                    "Dhuhr" -> nextTimes.dhuhr
+                    "Asr" -> nextTimes.asr
+                    "Maghrib" -> nextTimes.maghrib
+                    "Isha" -> nextTimes.isha
+                    else -> return
+                }
+
+                val nextPrayerDateTime = LocalDateTime.of(nextDate, nextLocalTime)
+                val triggerDateTime = nextPrayerDateTime.minusMinutes(30)
+
+                val now = LocalDateTime.now()
+                val finalTriggerDateTime = if (triggerDateTime.isBefore(now)) {
+                    now.plusMinutes(1)
+                } else {
+                    triggerDateTime
+                }
+
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent(context, AlarmReceiver::class.java).apply {
+                    putExtra(EXTRA_ACTION_TYPE, ACTION_MISSED_CHECK)
+                    putExtra(EXTRA_PRAYER_NAME, currentPrayerName)
+                    putExtra(EXTRA_DATE, currentDateStr)
+                }
+
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    300 + currentPrayerName.hashCode(),
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                )
+
+                val epochMillis = finalTriggerDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+                    } else {
+                        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+                    }
+                } else {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+                }
+                Log.d("AlarmReceiver", "Scheduled Qaza check for $currentPrayerName on $currentDateStr at $finalTriggerDateTime (30 mins before $nextPrayerName)")
+            } catch (e: Exception) {
+                Log.e("AlarmReceiver", "Error scheduling missed check", e)
             }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                300 + prayerName.hashCode(),
-                intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            val triggerTime = System.currentTimeMillis() + delayMinutes * 60 * 1000L
-            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
         }
 
         private fun calculateTimes(prefs: UserPreferences, date: LocalDate): PrayerTimeCalculator.PrayerTimes {
