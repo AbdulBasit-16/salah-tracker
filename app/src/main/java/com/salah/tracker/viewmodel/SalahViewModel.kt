@@ -149,6 +149,21 @@ class SalahViewModel(private val repository: SalahRepository) : ViewModel() {
         }
     }
 
+    fun updateSelectedCity(context: android.content.Context, cityName: String, latitude: Double, longitude: Double, timezoneOffset: Double) {
+        viewModelScope.launch {
+            val current = repository.getUserPreferences() ?: UserPreferences()
+            val updated = current.copy(
+                selectedCity = cityName,
+                latitude = latitude,
+                longitude = longitude,
+                timezoneOffset = timezoneOffset
+            )
+            repository.saveUserPreferences(updated)
+            // Reschedule alarms for the new location
+            com.salah.tracker.services.AlarmReceiver.rescheduleAlarms(context.applicationContext)
+        }
+    }
+
     private fun isObligatory(name: String): Boolean {
         return name in listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
     }

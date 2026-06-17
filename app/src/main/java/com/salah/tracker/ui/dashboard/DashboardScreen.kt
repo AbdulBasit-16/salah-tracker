@@ -61,6 +61,47 @@ fun DashboardScreen(
     val selectedCity = prefs?.selectedCity ?: "Makkah"
     val pair = getCurrentAndNextPrayer(todayTimes)
 
+    // Permission launcher for location detection on startup
+    val locationPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineGranted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true
+        val coarseGranted = permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (fineGranted || coarseGranted) {
+            com.salah.tracker.ui.detectLocation(context) { lat, lng, tz, cityName ->
+                viewModel.updateSelectedCity(context, cityName, lat, lng, tz)
+                android.widget.Toast.makeText(context, "Location updated: $cityName", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // Automatically trigger location auto-detection if current city is default/empty
+    LaunchedEffect(prefs) {
+        val p = prefs
+        if (p != null && (p.selectedCity == "Custom" || p.selectedCity == "Makkah" || p.selectedCity.isEmpty())) {
+            val hasFine = androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            val hasCoarse = androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (hasFine || hasCoarse) {
+                com.salah.tracker.ui.detectLocation(context) { lat, lng, tz, cityName ->
+                    viewModel.updateSelectedCity(context, cityName, lat, lng, tz)
+                }
+            } else {
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        }
+    }
+
     // Start background countdown service
     LaunchedEffect(Unit) {
         PrayerCountdownService.startService(context)

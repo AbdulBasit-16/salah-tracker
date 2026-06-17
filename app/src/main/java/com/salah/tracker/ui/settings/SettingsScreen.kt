@@ -2,6 +2,7 @@ package com.salah.tracker.ui.settings
 
 import android.Manifest
 import android.content.Context
+import com.salah.tracker.ui.detectLocation
 import android.location.LocationManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -526,73 +527,4 @@ fun ToggleSettingRow(
             )
         )
     }
-}
-
-private fun detectLocation(context: Context, onLocationDetected: (Double, Double, Double, String) -> Unit) {
-    try {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        
-        // Find last known location
-        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-            
-        if (location != null) {
-            val tzOffset = TimeZone.getDefault().rawOffset / 3600000.0
-            val geocoder = android.location.Geocoder(context, java.util.Locale.getDefault())
-            var cityName = ""
-            try {
-                @Suppress("DEPRECATION")
-                val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                val address = addresses?.firstOrNull()
-                if (address != null) {
-                    cityName = address.subLocality ?: address.featureName ?: address.locality ?: address.subAdminArea ?: address.adminArea ?: ""
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-            // Fallback: If Geocoder failed or yielded empty, find the closest Pakistan city preset
-            if (cityName.isEmpty() || cityName == "Detected Location") {
-                val closest = findClosestPakistanCity(location.latitude, location.longitude)
-                cityName = if (closest != null) {
-                    "$closest (Auto-Detected)"
-                } else {
-                    String.format("Location (%.3f, %.3f)", location.latitude, location.longitude)
-                }
-            }
-            onLocationDetected(location.latitude, location.longitude, tzOffset, cityName)
-        } else {
-            Toast.makeText(context, "GPS lock unavailable. Using default (Makkah).", Toast.LENGTH_LONG).show()
-            val tzOffset = TimeZone.getDefault().rawOffset / 3600000.0
-            onLocationDetected(21.4225, 39.8262, tzOffset, "Makkah")
-        }
-    } catch (e: SecurityException) {
-        Toast.makeText(context, "Location permission missing.", Toast.LENGTH_SHORT).show()
-    } catch (e: Exception) {
-        Toast.makeText(context, "Location detection failed: ${e.message}", Toast.LENGTH_SHORT).show()
-    }
-}
-
-private fun findClosestPakistanCity(latitude: Double, longitude: Double): String? {
-    var closestCity: String? = null
-    var minDistance = Double.MAX_VALUE
-    for (city in com.salah.tracker.data.model.PakistanCities.cities) {
-        val dist = calculateDistance(latitude, longitude, city.latitude, city.longitude)
-        if (dist < minDistance) {
-            minDistance = dist
-            closestCity = city.name
-        }
-    }
-    return if (minDistance < 150.0) closestCity else null
-}
-
-private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-    val r = 6371.0 // Earth radius in km
-    val dLat = Math.toRadians(lat2 - lat1)
-    val dLon = Math.toRadians(lon2 - lon1)
-    val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2)
-    val c = 2 * Math.asin(Math.sqrt(a))
-    return r * c
 }
