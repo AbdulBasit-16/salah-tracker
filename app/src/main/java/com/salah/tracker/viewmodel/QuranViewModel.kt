@@ -12,7 +12,9 @@ import kotlinx.coroutines.launch
 data class Verse(
     val chapter: Int,
     val verse: Int,
-    val text: String
+    val arabicText: String,
+    val englishText: String? = null,
+    val urduText: String? = null
 )
 
 class QuranViewModel(private val repository: SalahRepository) : ViewModel() {
@@ -74,6 +76,10 @@ class QuranViewModel(private val repository: SalahRepository) : ViewModel() {
         calculateJuzProgress(page)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), JuzProgressState(1, 0.0, 1, 21))
 
+    // User preferences flow
+    val preferences = repository.getUserPreferencesFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), com.salah.tracker.data.database.entities.UserPreferences())
+
     // Active Surah verses loaded from assets
     private val _activeSurahVerses = MutableStateFlow<List<Verse>>(emptyList())
     val activeSurahVerses: StateFlow<List<Verse>> = _activeSurahVerses.asStateFlow()
@@ -82,21 +88,52 @@ class QuranViewModel(private val repository: SalahRepository) : ViewModel() {
     private val _isLoadingSurah = MutableStateFlow(false)
     val isLoadingSurah: StateFlow<Boolean> = _isLoadingSurah.asStateFlow()
 
-    fun loadSurahVerses(context: Context, surahId: Int) {
+    fun loadSurahVerses(
+        context: Context,
+        surahId: Int,
+        scriptType: String,
+        showEnglish: Boolean,
+        showUrdu: Boolean
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             _isLoadingSurah.value = true
             try {
-                val jsonString = context.assets.open("quran.json").bufferedReader().use { it.readText() }
-                val jsonObject = org.json.JSONObject(jsonString)
-                val surahArray = jsonObject.optJSONArray(surahId.toString())
+                // Determine script asset
+                val scriptAsset = if (scriptType == "INDOPAK") "quran_indopak.json" else "quran.json"
+                val scriptString = context.assets.open(scriptAsset).bufferedReader().use { it.readText() }
+                val scriptObj = org.json.JSONObject(scriptString)
+                val scriptArray = scriptObj.optJSONArray(surahId.toString())
+
+                // Load translations if enabled
+                val englishObj = if (showEnglish) {
+                    val enStr = context.assets.open("translation_en.json").bufferedReader().use { it.readText() }
+                    org.json.JSONObject(enStr)
+                } else null
+                val englishArray = englishObj?.optJSONArray(surahId.toString())
+
+                val urduObj = if (showUrdu) {
+                    val urStr = context.assets.open("translation_ur.json").bufferedReader().use { it.readText() }
+                    org.json.JSONObject(urStr)
+                } else null
+                val urduArray = urduObj?.optJSONArray(surahId.toString())
+
                 val versesList = mutableListOf<Verse>()
-                if (surahArray != null) {
-                    for (i in 0 until surahArray.length()) {
-                        val verseObj = surahArray.getJSONObject(i)
+                if (scriptArray != null) {
+                    for (i in 0 until scriptArray.length()) {
+                        val verseObj = scriptArray.getJSONObject(i)
                         val chapter = verseObj.optInt("chapter")
                         val verseNum = verseObj.optInt("verse")
-                        val text = verseObj.optString("text")
-                        versesList.add(Verse(chapter, verseNum, text))
+                        val arabicText = verseObj.optString("text")
+
+                        val englishText = if (englishArray != null && i < englishArray.length()) {
+                            englishArray.getJSONObject(i).optString("text")
+                        } else null
+
+                        val urduText = if (urduArray != null && i < urduArray.length()) {
+                            urduArray.getJSONObject(i).optString("text")
+                        } else null
+
+                        versesList.add(Verse(chapter, verseNum, arabicText, englishText, urduText))
                     }
                 }
                 _activeSurahVerses.value = versesList
@@ -106,6 +143,18 @@ class QuranViewModel(private val repository: SalahRepository) : ViewModel() {
             } finally {
                 _isLoadingSurah.value = false
             }
+        }
+    }
+
+    fun updateQuranPreferences(script: String, showEnglish: Boolean, showUrdu: Boolean) {
+        viewModelScope.launch {
+            val current = repository.getUserPreferences() ?: com.salah.tracker.data.database.entities.UserPreferences()
+            val updated = current.copy(
+                quranScript = script,
+                showEnglishTranslation = showEnglish,
+                showUrduTranslation = showUrdu
+            )
+            repository.saveUserPreferences(updated)
         }
     }
 

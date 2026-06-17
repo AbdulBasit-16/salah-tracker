@@ -21,5 +21,9 @@ data class UserPreferences(
     val missedPrayerWindowMinutes: Int = 45,
     val postSalahRecitationEnabled: Boolean = true,
     val postSalahDelayMinutes: Int = 15,
-    val lastActiveDate: String = ""
+    val lastActiveDate: String = "",
+    val selectedCity: String = "Custom",
+    val quranScript: String = "UTHMANI",
+    val showEnglishTranslation: Boolean = true,
+    val showUrduTranslation: Boolean = true
 )

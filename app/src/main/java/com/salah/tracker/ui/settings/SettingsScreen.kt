@@ -25,6 +25,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.salah.tracker.data.database.entities.UserPreferences
 import com.salah.tracker.viewmodel.SettingsViewModel
+import com.salah.tracker.data.model.PakistanCities
+import com.salah.tracker.data.model.PakistanCity
 import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -106,6 +108,48 @@ fun SettingsScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Pakistan City Dropdown Selector
+                    var expandedCity by remember { mutableStateOf(false) }
+                    Column {
+                        Text("Pakistan City Preset", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                        Spacer(Modifier.height(4.dp))
+                        Box {
+                            OutlinedButton(
+                                onClick = { expandedCity = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(if (prefs.selectedCity.isEmpty()) "Select City (or Custom)" else prefs.selectedCity)
+                            }
+                            DropdownMenu(
+                                expanded = expandedCity,
+                                onDismissRequest = { expandedCity = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Custom / Auto-Detected") },
+                                    onClick = {
+                                        viewModel.updateSelectedCity("Custom", prefs.latitude, prefs.longitude, prefs.timezoneOffset)
+                                        expandedCity = false
+                                    }
+                                )
+                                PakistanCities.cities.forEach { city ->
+                                    DropdownMenuItem(
+                                        text = { Text(city.name) },
+                                        onClick = {
+                                            viewModel.updateSelectedCity(city.name, city.latitude, city.longitude, city.timezoneOffset)
+                                            latText = city.latitude.toString()
+                                            lngText = city.longitude.toString()
+                                            tzText = city.timezoneOffset.toString()
+                                            expandedCity = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(4.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -222,6 +266,116 @@ fun SettingsScreen(
                                     }
                                 )
                             }
+                        }
+                    }
+                }
+            }
+
+            // Quran Recitation Settings Card
+            Text(
+                "Quran Recitation Settings",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            )
+
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Script selector
+                    Column {
+                        Text("Arabic Script Style", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                        Spacer(Modifier.height(4.dp))
+                        val scripts = listOf("UTHMANI" to "Uthmani Script (Global)", "INDOPAK" to "Indo-Pak Script (South Asia)")
+                        
+                        var expandedScript by remember { mutableStateOf(false) }
+                        Box {
+                            OutlinedButton(
+                                onClick = { expandedScript = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(scripts.firstOrNull { it.first == prefs.quranScript }?.second ?: "Uthmani Script (Global)")
+                            }
+                            DropdownMenu(
+                                expanded = expandedScript,
+                                onDismissRequest = { expandedScript = false }
+                            ) {
+                                scripts.forEach { (key, label) ->
+                                    DropdownMenuItem(
+                                        text = { Text(label) },
+                                        onClick = {
+                                            viewModel.updateQuranPreferences(key, prefs.showEnglishTranslation, prefs.showUrduTranslation)
+                                            expandedScript = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Divider(color = MaterialTheme.colorScheme.background, thickness = 1.dp)
+
+                    // Translation Toggles
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Translations", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                        
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.updateQuranPreferences(
+                                        prefs.quranScript,
+                                        !prefs.showEnglishTranslation,
+                                        prefs.showUrduTranslation
+                                    )
+                                }
+                                .padding(vertical = 8.dp)
+                        ) {
+                            Checkbox(
+                                checked = prefs.showEnglishTranslation,
+                                onCheckedChange = {
+                                    viewModel.updateQuranPreferences(
+                                        prefs.quranScript,
+                                        it,
+                                        prefs.showUrduTranslation
+                                    )
+                                }
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text("English Translation (Sahih International)", style = MaterialTheme.typography.bodyLarge)
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.updateQuranPreferences(
+                                        prefs.quranScript,
+                                        prefs.showEnglishTranslation,
+                                        !prefs.showUrduTranslation
+                                    )
+                                }
+                                .padding(vertical = 8.dp)
+                        ) {
+                            Checkbox(
+                                checked = prefs.showUrduTranslation,
+                                onCheckedChange = {
+                                    viewModel.updateQuranPreferences(
+                                        prefs.quranScript,
+                                        prefs.showEnglishTranslation,
+                                        it
+                                    )
+                                }
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text("Urdu Translation (Jalandhari)", style = MaterialTheme.typography.bodyLarge)
                         }
                     }
                 }

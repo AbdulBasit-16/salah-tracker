@@ -40,6 +40,8 @@ fun QuranHubScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val prefsOrNull by viewModel.preferences.collectAsState()
+    val prefs = prefsOrNull ?: com.salah.tracker.data.database.entities.UserPreferences()
     var selectedTab by remember { mutableStateOf(0) } // 0: Tracker, 1: Recite Quran
     var activeSurah by remember { mutableStateOf<Surah?>(null) } // Non-null when reading a specific Surah
 
@@ -106,7 +108,7 @@ fun QuranHubScreen(
                     } else {
                         ReciteQuranTab(
                             onSelectSurah = { surah ->
-                                viewModel.loadSurahVerses(context, surah.number)
+                                viewModel.loadSurahVerses(context, surah.number, prefs.quranScript, prefs.showEnglishTranslation, prefs.showUrduTranslation)
                                 activeSurah = surah
                             }
                         )
@@ -388,9 +390,17 @@ fun SurahReaderScreen(
     surah: Surah,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val verses by viewModel.activeSurahVerses.collectAsState()
     val isLoading by viewModel.isLoadingSurah.collectAsState()
+    val prefsOrNull by viewModel.preferences.collectAsState()
+    val prefs = prefsOrNull ?: com.salah.tracker.data.database.entities.UserPreferences()
     var arabicFontSize by remember { mutableStateOf(28) } // adjustable Arabic font size
+    var showReaderSettings by remember { mutableStateOf(false) }
+
+    LaunchedEffect(surah.number, prefs.quranScript, prefs.showEnglishTranslation, prefs.showUrduTranslation) {
+        viewModel.loadSurahVerses(context, surah.number, prefs.quranScript, prefs.showEnglishTranslation, prefs.showUrduTranslation)
+    }
 
     Scaffold(
         topBar = {
@@ -413,13 +423,8 @@ fun SurahReaderScreen(
                     }
                 },
                 actions = {
-                    // Font Size adjustments
-                    IconButton(onClick = { if (arabicFontSize > 20) arabicFontSize -= 2 }) {
-                        Icon(Icons.Default.Remove, contentDescription = "Decrease text size", tint = MaterialTheme.colorScheme.primary)
-                    }
-                    Icon(Icons.Default.FormatSize, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-                    IconButton(onClick = { if (arabicFontSize < 48) arabicFontSize += 2 }) {
-                        Icon(Icons.Default.Add, contentDescription = "Increase text size", tint = MaterialTheme.colorScheme.primary)
+                    IconButton(onClick = { showReaderSettings = true }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -471,7 +476,7 @@ fun SurahReaderScreen(
                             ) {
                                 // Right-aligned Arabic Text
                                 Text(
-                                    text = verse.text,
+                                    text = verse.arabicText,
                                     fontSize = arabicFontSize.sp,
                                     lineHeight = (arabicFontSize * 1.5).sp,
                                     fontWeight = FontWeight.Bold,
@@ -482,6 +487,37 @@ fun SurahReaderScreen(
                                         textDirection = TextDirection.Rtl
                                     )
                                 )
+
+                                // Right-aligned Urdu Translation
+                                if (prefs.showUrduTranslation && !verse.urduText.isNullOrEmpty()) {
+                                    Divider(color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
+                                    Text(
+                                        text = verse.urduText,
+                                        fontSize = (arabicFontSize * 0.7).sp,
+                                        lineHeight = (arabicFontSize * 1.1).sp,
+                                        fontWeight = FontWeight.Normal,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        textAlign = TextAlign.Right,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        style = LocalTextStyle.current.copy(
+                                            textDirection = TextDirection.Rtl
+                                        )
+                                    )
+                                }
+
+                                // Left-aligned English Translation
+                                if (prefs.showEnglishTranslation && !verse.englishText.isNullOrEmpty()) {
+                                    Divider(color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
+                                    Text(
+                                        text = verse.englishText,
+                                        fontSize = (arabicFontSize * 0.65).sp,
+                                        lineHeight = (arabicFontSize * 1.0).sp,
+                                        fontWeight = FontWeight.Normal,
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                                        textAlign = TextAlign.Left,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
 
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -514,6 +550,139 @@ fun SurahReaderScreen(
                 }
             }
         }
+    }
+
+    if (showReaderSettings) {
+        AlertDialog(
+            onDismissRequest = { showReaderSettings = false },
+            title = { Text("Quran Reader Settings", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)) },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                ) {
+                    // Font size control
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Arabic Font Size: $arabicFontSize", fontWeight = FontWeight.Bold)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { if (arabicFontSize > 20) arabicFontSize -= 2 }) {
+                                Icon(Icons.Default.Remove, contentDescription = "Decrease", tint = MaterialTheme.colorScheme.primary)
+                            }
+                            IconButton(onClick = { if (arabicFontSize < 48) arabicFontSize += 2 }) {
+                                Icon(Icons.Default.Add, contentDescription = "Increase", tint = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+                    }
+
+                    Divider()
+
+                    // Script type selector
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Arabic Script Style", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                        var expandedScript by remember { mutableStateOf(false) }
+                        Box {
+                            OutlinedButton(
+                                onClick = { expandedScript = true },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(if (prefs.quranScript == "INDOPAK") "Indo-Pak Script" else "Uthmani Script")
+                            }
+                            DropdownMenu(
+                                expanded = expandedScript,
+                                onDismissRequest = { expandedScript = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Uthmani Script (Global)") },
+                                    onClick = {
+                                        viewModel.updateQuranPreferences("UTHMANI", prefs.showEnglishTranslation, prefs.showUrduTranslation)
+                                        expandedScript = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Indo-Pak Script (South Asia)") },
+                                    onClick = {
+                                        viewModel.updateQuranPreferences("INDOPAK", prefs.showEnglishTranslation, prefs.showUrduTranslation)
+                                        expandedScript = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Divider()
+
+                    // Translations checkboxes
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Translations", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.updateQuranPreferences(
+                                        prefs.quranScript,
+                                        !prefs.showEnglishTranslation,
+                                        prefs.showUrduTranslation
+                                    )
+                                }
+                                .padding(vertical = 4.dp)
+                        ) {
+                            Checkbox(
+                                checked = prefs.showEnglishTranslation,
+                                onCheckedChange = {
+                                    viewModel.updateQuranPreferences(
+                                        prefs.quranScript,
+                                        it,
+                                        prefs.showUrduTranslation
+                                    )
+                                }
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text("English Translation")
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.updateQuranPreferences(
+                                        prefs.quranScript,
+                                        prefs.showEnglishTranslation,
+                                        !prefs.showUrduTranslation
+                                    )
+                                }
+                                .padding(vertical = 4.dp)
+                        ) {
+                            Checkbox(
+                                checked = prefs.showUrduTranslation,
+                                onCheckedChange = {
+                                    viewModel.updateQuranPreferences(
+                                        prefs.quranScript,
+                                        prefs.showEnglishTranslation,
+                                        it
+                                    )
+                                }
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text("Urdu Translation")
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showReaderSettings = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Close")
+                }
+            }
+        )
     }
 }
 

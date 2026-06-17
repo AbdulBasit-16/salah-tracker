@@ -81,4 +81,31 @@ class SettingsViewModel(
             repository.saveUserPreferences(updated)
         }
     }
+
+    fun updateQuranPreferences(script: String, showEnglish: Boolean, showUrdu: Boolean) {
+        viewModelScope.launch {
+            val current = repository.getUserPreferences() ?: UserPreferences()
+            val updated = current.copy(
+                quranScript = script,
+                showEnglishTranslation = showEnglish,
+                showUrduTranslation = showUrdu
+            )
+            repository.saveUserPreferences(updated)
+        }
+    }
+
+    fun updateSelectedCity(cityName: String, latitude: Double, longitude: Double, timezoneOffset: Double) {
+        viewModelScope.launch {
+            val current = repository.getUserPreferences() ?: UserPreferences()
+            val updated = current.copy(
+                selectedCity = cityName,
+                latitude = latitude,
+                longitude = longitude,
+                timezoneOffset = timezoneOffset
+            )
+            repository.saveUserPreferences(updated)
+            // Reschedule alarms for the new location
+            com.salah.tracker.services.AlarmReceiver.rescheduleAlarms(context)
+        }
+    }
 }
