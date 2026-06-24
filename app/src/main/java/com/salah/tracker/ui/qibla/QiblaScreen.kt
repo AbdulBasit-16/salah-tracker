@@ -23,6 +23,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -186,16 +187,82 @@ fun QiblaScreen(
                     val center = Offset(size.width / 2, size.height / 2)
                     val radius = size.width / 2
 
-                    // 1. Draw outer static boundary circle
+                    // 1. Draw outer static boundary circles (Radar / Dial Bezel look)
                     drawCircle(
                         color = themeColor.copy(alpha = 0.15f),
                         radius = radius,
                         center = center
                     )
+                    drawCircle(
+                        color = themeColor.copy(alpha = 0.4f),
+                        radius = radius,
+                        center = center,
+                        style = Stroke(width = 2.dp.toPx())
+                    )
+                    drawCircle(
+                        color = Color.Gray.copy(alpha = 0.15f),
+                        radius = radius * 0.75f,
+                        center = center,
+                        style = Stroke(width = 1.dp.toPx())
+                    )
+                    drawCircle(
+                        color = Color.Gray.copy(alpha = 0.15f),
+                        radius = radius * 0.45f,
+                        center = center,
+                        style = Stroke(width = 1.dp.toPx())
+                    )
+
+                    // Draw static top bezel index pointer pointing downwards (North orientation target)
+                    val staticPointerPath = android.graphics.Path().apply {
+                        moveTo(center.x, center.y - radius - 2f)
+                        lineTo(center.x - 10f, center.y - radius - 18f)
+                        lineTo(center.x + 10f, center.y - radius - 18f)
+                        close()
+                    }
+                    drawContext.canvas.nativeCanvas.drawPath(
+                        staticPointerPath,
+                        android.graphics.Paint().apply {
+                            color = android.graphics.Color.WHITE
+                            style = android.graphics.Paint.Style.FILL
+                        }
+                    )
 
                     // 2. Draw rotating compass rose
                     // The dial rotates counter-clockwise relative to device heading so N points North
                     rotate(degrees = -heading, pivot = center) {
+                        // Draw thin cross-hair axes (N-S and E-W)
+                        drawLine(
+                            color = Color.Gray.copy(alpha = 0.25f),
+                            start = Offset(center.x, center.y - radius * 0.85f),
+                            end = Offset(center.x, center.y + radius * 0.85f),
+                            strokeWidth = 1.dp.toPx()
+                        )
+                        drawLine(
+                            color = Color.Gray.copy(alpha = 0.25f),
+                            start = Offset(center.x - radius * 0.85f, center.y),
+                            end = Offset(center.x + radius * 0.85f, center.y),
+                            strokeWidth = 1.dp.toPx()
+                        )
+
+                        // Draw circular dial tick graduations every 30 degrees
+                        for (angle in 0 until 360 step 30) {
+                            val isCardinal = angle % 90 == 0
+                            val tickLen = if (isCardinal) 14.dp.toPx() else 8.dp.toPx()
+                            val stroke = if (isCardinal) 2.dp.toPx() else 1.dp.toPx()
+                            val color = if (isCardinal) Color.White else Color.Gray.copy(alpha = 0.5f)
+
+                            val rad = Math.toRadians(angle.toDouble())
+                            val cosVal = cos(rad).toFloat()
+                            val sinVal = sin(rad).toFloat()
+
+                            drawLine(
+                                color = color,
+                                start = Offset(center.x + (radius - tickLen) * cosVal, center.y + (radius - tickLen) * sinVal),
+                                end = Offset(center.x + radius * cosVal, center.y + radius * sinVal),
+                                strokeWidth = stroke
+                            )
+                        }
+
                         // Draw North indicator line
                         drawLine(
                             color = Color.White,
@@ -203,11 +270,12 @@ fun QiblaScreen(
                             end = Offset(center.x, center.y - radius),
                             strokeWidth = 3.dp.toPx()
                         )
+
                         // Label N
                         drawContext.canvas.nativeCanvas.drawText(
                             "N",
                             center.x,
-                            center.y - radius + 35f,
+                            center.y - radius + 38f,
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.WHITE
                                 textSize = 40f
@@ -219,7 +287,7 @@ fun QiblaScreen(
                         drawContext.canvas.nativeCanvas.drawText(
                             "S",
                             center.x,
-                            center.y + radius - 15f,
+                            center.y + radius - 18f,
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.GRAY
                                 textSize = 32f
@@ -229,7 +297,7 @@ fun QiblaScreen(
                         // Label E
                         drawContext.canvas.nativeCanvas.drawText(
                             "E",
-                            center.x + radius - 25f,
+                            center.x + radius - 28f,
                             center.y + 10f,
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.GRAY
@@ -240,7 +308,7 @@ fun QiblaScreen(
                         // Label W
                         drawContext.canvas.nativeCanvas.drawText(
                             "W",
-                            center.x - radius + 25f,
+                            center.x - radius + 28f,
                             center.y + 10f,
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.GRAY
@@ -251,18 +319,18 @@ fun QiblaScreen(
 
                         // 3. Draw Qibla pointer line & arrow
                         rotate(degrees = qiblaAngle.toFloat(), pivot = center) {
-                            // Draw Qibla pointer line
+                            // Draw Qibla pointer line (Thicker, styled indicator)
                             drawLine(
                                 color = themeColor,
                                 start = center,
                                 end = Offset(center.x, center.y - radius + 20f),
                                 strokeWidth = 5.dp.toPx()
                             )
-                            // Draw Arrowhead
+                            // Draw elegant Qibla arrowhead
                             val arrowPath = android.graphics.Path().apply {
                                 moveTo(center.x, center.y - radius)
-                                lineTo(center.x - 20f, center.y - radius + 40f)
-                                lineTo(center.x + 20f, center.y - radius + 40f)
+                                lineTo(center.x - 22f, center.y - radius + 44f)
+                                lineTo(center.x + 22f, center.y - radius + 44f)
                                 close()
                             }
                             drawContext.canvas.nativeCanvas.drawPath(
@@ -276,7 +344,7 @@ fun QiblaScreen(
                             drawContext.canvas.nativeCanvas.drawText(
                                 "🕋",
                                 center.x,
-                                center.y - radius + 70f,
+                                center.y - radius + 78f,
                                 android.graphics.Paint().apply {
                                     textSize = 48f
                                     textAlign = android.graphics.Paint.Align.CENTER

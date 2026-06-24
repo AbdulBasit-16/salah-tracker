@@ -30,7 +30,7 @@ import com.salah.tracker.viewmodel.SalahViewModel
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @Composable
 fun InsightsScreen(
     viewModel: SalahViewModel,
@@ -38,6 +38,7 @@ fun InsightsScreen(
 ) {
     val qazaBalances by viewModel.qazaBalances.collectAsState()
     val todayLogs by viewModel.todayPrayerLogs.collectAsState()
+    val last7DaysLogs by viewModel.last7DaysPrayerLogs.collectAsState()
 
     // Calculate completion metrics
     val totalObligatory = todayLogs.filter { it.prayerName in listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha") }
@@ -199,26 +200,38 @@ fun InsightsScreen(
                         style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))
                     )
                     Spacer(Modifier.height(16.dp))
+                    val completedDays = remember(last7DaysLogs) {
+                        (0..6).associateWith { i ->
+                            val dateStr = LocalDate.now().minusDays(i.toLong()).toString()
+                            val dailyLogs = last7DaysLogs.filter {
+                                it.date == dateStr && it.prayerName in listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+                            }
+                            dailyLogs.isNotEmpty() && dailyLogs.all { log ->
+                                log.status.startsWith("Offered") || log.status == "Excused"
+                            }
+                        }
+                    }
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        // We will display a peaceful visual representing daily streak
-                        for (i in 0..4) {
+                        for (i in 0..6) {
                             val date = LocalDate.now().minusDays(i.toLong())
                             val dayLabel = date.dayOfWeek.name.take(3)
+                            val isCompleted = completedDays[i] == true
                             
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Surface(
                                     modifier = Modifier.size(36.dp),
                                     shape = RoundedCornerShape(18.dp),
-                                    color = if (i < 3) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background
+                                    color = if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
                                             Icons.Default.Check,
                                             contentDescription = null,
-                                            tint = if (i < 3) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
+                                            tint = if (isCompleted) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
                                             modifier = Modifier.size(18.dp)
                                         )
                                     }

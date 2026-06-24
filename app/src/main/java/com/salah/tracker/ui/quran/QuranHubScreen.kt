@@ -738,38 +738,160 @@ fun QuranLogDialog(
 
     var errorText by remember { mutableStateOf("") }
 
+    // Dropdown and Autocomplete States
+    var expandedSurah by remember { mutableStateOf(false) }
+    val filteredSurahList = remember(surah) {
+        if (surah.isEmpty()) {
+            com.salah.tracker.data.model.SurahData.surahs
+        } else {
+            com.salah.tracker.data.model.SurahData.surahs.filter {
+                it.nameEnglish.contains(surah, ignoreCase = true)
+            }
+        }
+    }
+
+    val selectedSurah = remember(surah) {
+        com.salah.tracker.data.model.SurahData.surahs.firstOrNull {
+            it.nameEnglish.equals(surah, ignoreCase = true)
+        }
+    }
+    val totalAyahs = selectedSurah?.verseCount ?: 286 // Fallback limit
+
+    var expandedStartAyah by remember { mutableStateOf(false) }
+    var expandedEndAyah by remember { mutableStateOf(false) }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Log Recitation", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)) },
         text = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedTextField(
-                    value = surah,
-                    onValueChange = { surah = it },
-                    label = { Text("Surah Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Surah Name Autocomplete Text Field
+                Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
-                        value = startAyah,
-                        onValueChange = { startAyah = it },
-                        label = { Text("Start Ayah") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
+                        value = surah,
+                        onValueChange = {
+                            surah = it
+                            expandedSurah = true
+                        },
+                        label = { Text("Surah Name") },
+                        modifier = Modifier.fillMaxWidth(),
+                        trailingIcon = {
+                            IconButton(onClick = { expandedSurah = !expandedSurah }) {
+                                Icon(androidx.compose.material.icons.Icons.Default.ArrowDropDown, contentDescription = "Select Surah")
+                            }
+                        }
                     )
-                    OutlinedTextField(
-                        value = endAyah,
-                        onValueChange = { endAyah = it },
-                        label = { Text("End Ayah") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
-                    )
+                    if (expandedSurah && filteredSurahList.isNotEmpty()) {
+                        DropdownMenu(
+                            expanded = expandedSurah,
+                            onDismissRequest = { expandedSurah = false },
+                            properties = androidx.compose.ui.window.PopupProperties(focusable = false),
+                            modifier = Modifier.fillMaxWidth(0.9f).heightIn(max = 240.dp)
+                        ) {
+                            filteredSurahList.forEach { s ->
+                                DropdownMenuItem(
+                                    text = { Text(s.nameEnglish) },
+                                    onClick = {
+                                        surah = s.nameEnglish
+                                        expandedSurah = false
+                                        // Reset Ayahs to start/end of the new Surah
+                                        startAyah = "1"
+                                        endAyah = "${s.verseCount}"
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Start & End Ayah selection Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Start Ayah
+                    Box(modifier = Modifier.weight(1f)) {
+                        OutlinedTextField(
+                            value = startAyah,
+                            onValueChange = { startAyah = it },
+                            label = { Text("Start Ayah") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                IconButton(onClick = { expandedStartAyah = !expandedStartAyah }) {
+                                    Icon(androidx.compose.material.icons.Icons.Default.ArrowDropDown, contentDescription = "Select Start Ayah")
+                                }
+                            }
+                        )
+                        if (expandedStartAyah) {
+                            DropdownMenu(
+                                expanded = expandedStartAyah,
+                                onDismissRequest = { expandedStartAyah = false },
+                                modifier = Modifier.heightIn(max = 200.dp)
+                            ) {
+                                for (i in 1..totalAyahs) {
+                                    DropdownMenuItem(
+                                        text = { Text("$i") },
+                                        onClick = {
+                                            startAyah = "$i"
+                                            expandedStartAyah = false
+                                            // Keep endAyah valid (not smaller than startAyah)
+                                            val endVal = endAyah.toIntOrNull() ?: 0
+                                            if (endVal < i) {
+                                                endAyah = "$i"
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // End Ayah
+                    Box(modifier = Modifier.weight(1f)) {
+                        OutlinedTextField(
+                            value = endAyah,
+                            onValueChange = { endAyah = it },
+                            label = { Text("End Ayah") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                IconButton(onClick = { expandedEndAyah = !expandedEndAyah }) {
+                                    Icon(androidx.compose.material.icons.Icons.Default.ArrowDropDown, contentDescription = "Select End Ayah")
+                                }
+                            }
+                        )
+                        if (expandedEndAyah) {
+                            DropdownMenu(
+                                expanded = expandedEndAyah,
+                                onDismissRequest = { expandedEndAyah = false },
+                                modifier = Modifier.heightIn(max = 200.dp)
+                            ) {
+                                val startNum = startAyah.toIntOrNull() ?: 1
+                                for (i in startNum..totalAyahs) {
+                                    DropdownMenuItem(
+                                        text = { Text("$i") },
+                                        onClick = {
+                                            endAyah = "$i"
+                                            expandedEndAyah = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Start & End Page Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     OutlinedTextField(
                         value = startPage,
                         onValueChange = { startPage = it },
@@ -787,7 +909,7 @@ fun QuranLogDialog(
                 }
 
                 if (errorText.isNotEmpty()) {
-                    Text(errorText, color = MissedGray, style = MaterialTheme.typography.bodySmall)
+                    Text(errorText, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                 }
             }
         },
@@ -821,7 +943,7 @@ fun QuranLogDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                Text("Cancel", color = MaterialTheme.colorScheme.secondary)
             }
         }
     )

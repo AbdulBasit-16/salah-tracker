@@ -39,6 +39,14 @@ class SalahViewModel(private val repository: SalahRepository) : ViewModel() {
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
+    val last7DaysPrayerLogs: StateFlow<List<PrayerLog>> = _currentDate
+        .flatMapLatest { currentDate ->
+            val start = currentDate.minusDays(6)
+            repository.getPrayerLogsInDateRangeFlow(start.toString(), currentDate.toString())
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     // Calculated prayer times for today
     val todayPrayerTimes = combine(userPreferences, _currentDate) { prefs, date ->
         calculateTimesForDate(prefs, date)
