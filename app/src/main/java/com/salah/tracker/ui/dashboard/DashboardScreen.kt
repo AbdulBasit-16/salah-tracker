@@ -45,7 +45,8 @@ fun DashboardScreen(
     viewModel: SalahViewModel,
     onNavigateToQuran: () -> Unit,
     onNavigateToInsights: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToProfile: () -> Unit
 ) {
     val context = LocalContext.current
     val currentDate by viewModel.currentDate.collectAsState()
@@ -153,12 +154,24 @@ fun DashboardScreen(
                         )
                     }
 
-                    IconButton(onClick = { showFloatingWidget = !showFloatingWidget }) {
-                        Icon(
-                            Icons.Default.Widgets,
-                            contentDescription = "Toggle Floating Widget",
-                            tint = if (showFloatingWidget) Color(0xFF3A9AD9) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-                        )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        IconButton(onClick = { showFloatingWidget = !showFloatingWidget }) {
+                            Icon(
+                                Icons.Default.Widgets,
+                                contentDescription = "Toggle Floating Widget",
+                                tint = if (showFloatingWidget) Color(0xFF3A9AD9) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                            )
+                        }
+                        IconButton(onClick = onNavigateToProfile) {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = "Profile",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
@@ -171,6 +184,20 @@ fun DashboardScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Salam Greeting Header
+                val greeting = if (prefs?.currentUsername.isNullOrBlank()) {
+                    "Salam, Guest"
+                } else {
+                    "Salam, ${prefs?.currentUsername}"
+                }
+                Text(
+                    text = greeting,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    ),
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                )
                 // Beautiful Custom Analog Clock
                 Box(
                     modifier = Modifier

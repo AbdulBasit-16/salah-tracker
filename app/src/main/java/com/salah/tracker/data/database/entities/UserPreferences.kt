@@ -26,5 +26,7 @@ data class UserPreferences(
     val quranScript: String = "UTHMANI",
     val showEnglishTranslation: Boolean = true,
     val showUrduTranslation: Boolean = true,
-    val hijriAdjustment: Int = 0
+    val hijriAdjustment: Int = 0,
+    val currentUserId: Long = -1L,
+    val currentUsername: String = ""
 )

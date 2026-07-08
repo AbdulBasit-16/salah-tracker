@@ -36,4 +36,10 @@ interface SalahRepository {
     suspend fun insertQuranLog(log: QuranLog)
     suspend fun deleteQuranLog(log: QuranLog)
     fun getTotalPagesReadFlow(): Flow<Int?>
+
+    // User Management
+    suspend fun registerUser(username: String, email: String, passwordHash: String): Long
+    suspend fun getUserByEmail(email: String): com.salah.tracker.data.database.entities.User?
+    suspend fun loginUser(userId: Long, username: String)
+    suspend fun logoutUser()
 }

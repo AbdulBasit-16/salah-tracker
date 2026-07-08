@@ -19,6 +19,7 @@ import com.salah.tracker.ui.insights.InsightsScreen
 import com.salah.tracker.ui.quran.QuranHubScreen
 import com.salah.tracker.ui.settings.SettingsScreen
 import com.salah.tracker.ui.qibla.QiblaScreen
+import com.salah.tracker.ui.profile.ProfileScreen
 import com.salah.tracker.viewmodel.QuranViewModel
 import com.salah.tracker.viewmodel.SalahViewModel
 import com.salah.tracker.viewmodel.SettingsViewModel
@@ -85,7 +86,8 @@ fun AppNavigation(
                     viewModel = salahViewModel,
                     onNavigateToQuran = { navController.navigate(Screen.QuranHub.route) },
                     onNavigateToInsights = { navController.navigate(Screen.Insights.route) },
-                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
+                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                    onNavigateToProfile = { navController.navigate(Screen.Profile.route) }
                 )
             }
 
@@ -112,6 +114,13 @@ fun AppNavigation(
 
             composable(Screen.Qibla.route) {
                 QiblaScreen(
+                    viewModel = salahViewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.Profile.route) {
+                ProfileScreen(
                     viewModel = salahViewModel,
                     onBack = { navController.popBackStack() }
                 )

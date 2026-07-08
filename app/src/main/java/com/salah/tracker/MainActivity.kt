@@ -45,7 +45,8 @@ class MainActivity : ComponentActivity() {
             preferencesDao = database.userPreferencesDao(),
             prayerLogDao = database.prayerLogDao(),
             qazaCounterDao = database.qazaCounterDao(),
-            quranLogDao = database.quranLogDao()
+            quranLogDao = database.quranLogDao(),
+            userDao = database.userDao()
         )
         val factory = ViewModelFactory(repository, applicationContext)
 

@@ -264,4 +264,67 @@ class SalahViewModel(private val repository: SalahRepository) : ViewModel() {
         // Update last active date to today
         repository.saveUserPreferences(prefs.copy(lastActiveDate = todayStr))
     }
+
+    fun register(username: String, email: String, passwordRaw: String, onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            if (username.isBlank() || email.isBlank() || passwordRaw.isBlank()) {
+                onResult(false, "Please fill in all fields")
+                return@launch
+            }
+            try {
+                val existing = repository.getUserByEmail(email)
+                if (existing != null) {
+                    onResult(false, "Email is already registered")
+                    return@launch
+                }
+                val passwordHash = hashPassword(passwordRaw)
+                val userId = repository.registerUser(username, email, passwordHash)
+                repository.loginUser(userId, username)
+                onResult(true, "Registration successful!")
+            } catch (e: Exception) {
+                onResult(false, "Error: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun login(email: String, passwordRaw: String, onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            if (email.isBlank() || passwordRaw.isBlank()) {
+                onResult(false, "Please fill in all fields")
+                return@launch
+            }
+            try {
+                val user = repository.getUserByEmail(email)
+                if (user == null) {
+                    onResult(false, "User not found")
+                    return@launch
+                }
+                val passwordHash = hashPassword(passwordRaw)
+                if (user.passwordHash == passwordHash) {
+                    repository.loginUser(user.id, user.username)
+                    onResult(true, "Logged in successfully!")
+                } else {
+                    onResult(false, "Incorrect password")
+                }
+            } catch (e: Exception) {
+                onResult(false, "Error: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            repository.logoutUser()
+        }
+    }
+
+    private fun hashPassword(password: String): String {
+        return try {
+            val digest = java.security.MessageDigest.getInstance("SHA-256")
+            val hash = digest.digest(password.toByteArray(Charsets.UTF_8))
+            hash.joinToString("") { "%02x".format(it) }
+        } catch (e: Exception) {
+            password
+        }
+    }
 }

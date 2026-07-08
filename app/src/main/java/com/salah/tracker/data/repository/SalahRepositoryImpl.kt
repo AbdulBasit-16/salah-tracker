@@ -4,17 +4,20 @@ import com.salah.tracker.data.database.daos.PrayerLogDao
 import com.salah.tracker.data.database.daos.QazaCounterDao
 import com.salah.tracker.data.database.daos.QuranLogDao
 import com.salah.tracker.data.database.daos.UserPreferencesDao
+import com.salah.tracker.data.database.daos.UserDao
 import com.salah.tracker.data.database.entities.PrayerLog
 import com.salah.tracker.data.database.entities.QazaCounter
 import com.salah.tracker.data.database.entities.QuranLog
 import com.salah.tracker.data.database.entities.UserPreferences
+import com.salah.tracker.data.database.entities.User
 import kotlinx.coroutines.flow.Flow
 
 class SalahRepositoryImpl(
     private val preferencesDao: UserPreferencesDao,
     private val prayerLogDao: PrayerLogDao,
     private val qazaCounterDao: QazaCounterDao,
-    private val quranLogDao: QuranLogDao
+    private val quranLogDao: QuranLogDao,
+    private val userDao: UserDao
 ) : SalahRepository {
 
     override fun getUserPreferencesFlow(): Flow<UserPreferences?> = preferencesDao.getUserPreferencesFlow()
@@ -80,4 +83,33 @@ class SalahRepositoryImpl(
     }
 
     override fun getTotalPagesReadFlow(): Flow<Int?> = quranLogDao.getTotalPagesReadFlow()
+
+    override suspend fun registerUser(username: String, email: String, passwordHash: String): Long {
+        val user = User(username = username, email = email, passwordHash = passwordHash)
+        return userDao.insertUser(user)
+    }
+
+    override suspend fun getUserByEmail(email: String): User? {
+        return userDao.getUserByEmail(email)
+    }
+
+    override suspend fun loginUser(userId: Long, username: String) {
+        val prefs = preferencesDao.getUserPreferences() ?: UserPreferences()
+        preferencesDao.insertUserPreferences(
+            prefs.copy(
+                currentUserId = userId,
+                currentUsername = username
+            )
+        )
+    }
+
+    override suspend fun logoutUser() {
+        val prefs = preferencesDao.getUserPreferences() ?: UserPreferences()
+        preferencesDao.insertUserPreferences(
+            prefs.copy(
+                currentUserId = -1L,
+                currentUsername = ""
+            )
+        )
+    }
 }

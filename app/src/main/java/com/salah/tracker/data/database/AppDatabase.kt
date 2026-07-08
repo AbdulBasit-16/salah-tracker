@@ -9,10 +9,12 @@ import com.salah.tracker.data.database.daos.PrayerLogDao
 import com.salah.tracker.data.database.daos.QazaCounterDao
 import com.salah.tracker.data.database.daos.QuranLogDao
 import com.salah.tracker.data.database.daos.UserPreferencesDao
+import com.salah.tracker.data.database.daos.UserDao
 import com.salah.tracker.data.database.entities.PrayerLog
 import com.salah.tracker.data.database.entities.QazaCounter
 import com.salah.tracker.data.database.entities.QuranLog
 import com.salah.tracker.data.database.entities.UserPreferences
+import com.salah.tracker.data.database.entities.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,9 +24,10 @@ import kotlinx.coroutines.launch
         UserPreferences::class,
         PrayerLog::class,
         QazaCounter::class,
-        QuranLog::class
+        QuranLog::class,
+        User::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -33,6 +36,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun prayerLogDao(): PrayerLogDao
     abstract fun qazaCounterDao(): QazaCounterDao
     abstract fun quranLogDao(): QuranLogDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile
@@ -68,7 +72,7 @@ abstract class AppDatabase : RoomDatabase() {
                         } else {
                             // If INSTANCE is not populated yet, we can write a SQL transaction on the db directly
                             // to ensure standard integrity
-                            db.execSQL("INSERT OR IGNORE INTO user_preferences (id, calculationMethod, juristicMethod, themeName, latitude, longitude, timezoneOffset, fajrNotifEnabled, dhuhrNotifEnabled, asrNotifEnabled, maghribNotifEnabled, ishaNotifEnabled, missedPrayerRemindersEnabled, missedPrayerWindowMinutes, postSalahRecitationEnabled, postSalahDelayMinutes, lastActiveDate, selectedCity, quranScript, showEnglishTranslation, showUrduTranslation, hijriAdjustment) VALUES (1, 'MWL', 'STANDARD', 'FOREST_GREEN', 21.4225, 39.8262, 3.0, 1, 1, 1, 1, 1, 1, 45, 1, 15, '', 'Custom', 'UTHMANI', 1, 1, 0)")
+                            db.execSQL("INSERT OR IGNORE INTO user_preferences (id, calculationMethod, juristicMethod, themeName, latitude, longitude, timezoneOffset, fajrNotifEnabled, dhuhrNotifEnabled, asrNotifEnabled, maghribNotifEnabled, ishaNotifEnabled, missedPrayerRemindersEnabled, missedPrayerWindowMinutes, postSalahRecitationEnabled, postSalahDelayMinutes, lastActiveDate, selectedCity, quranScript, showEnglishTranslation, showUrduTranslation, hijriAdjustment, currentUserId, currentUsername) VALUES (1, 'MWL', 'STANDARD', 'FOREST_GREEN', 21.4225, 39.8262, 3.0, 1, 1, 1, 1, 1, 1, 45, 1, 15, '', 'Custom', 'UTHMANI', 1, 1, 0, -1, '')")
                             db.execSQL("INSERT OR IGNORE INTO qaza_counters (prayerName, count) VALUES ('Fajr', 0)")
                             db.execSQL("INSERT OR IGNORE INTO qaza_counters (prayerName, count) VALUES ('Dhuhr', 0)")
                             db.execSQL("INSERT OR IGNORE INTO qaza_counters (prayerName, count) VALUES ('Asr', 0)")
