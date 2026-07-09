@@ -2,6 +2,7 @@ package com.salah.tracker.ui.profile
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -19,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -28,9 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.salah.tracker.data.database.entities.UserPreferences
 import com.salah.tracker.viewmodel.SalahViewModel
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +44,7 @@ fun ProfileScreen(
 
     val isSignedIn = prefs.currentUserId != -1L
     var activeTab by remember { mutableStateOf(0) } // 0 = Login, 1 = Signup
+    var showGoogleSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -130,19 +131,106 @@ fun ProfileScreen(
                             Spacer(modifier = Modifier.height(24.dp))
 
                             if (activeTab == 0) {
-                                LoginView(viewModel = viewModel, onLoginSuccess = {
-                                    Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
-                                    onBack()
-                                })
+                                LoginView(
+                                    viewModel = viewModel,
+                                    onLoginSuccess = {
+                                        Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
+                                        onBack()
+                                    },
+                                    onGoogleSignInClick = { showGoogleSheet = true }
+                                )
                             } else {
-                                RegisterView(viewModel = viewModel, onRegisterSuccess = {
-                                    Toast.makeText(context, "Account created successfully!", Toast.LENGTH_SHORT).show()
-                                    onBack()
-                                })
+                                RegisterView(
+                                    viewModel = viewModel,
+                                    onRegisterSuccess = {
+                                        Toast.makeText(context, "Account created successfully!", Toast.LENGTH_SHORT).show()
+                                        onBack()
+                                    },
+                                    onGoogleSignInClick = { showGoogleSheet = true }
+                                )
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    if (showGoogleSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showGoogleSheet = false },
+            sheetState = rememberModalBottomSheetState(),
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Choose an account",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "to continue to Salah Tracker",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                GoogleAccountRow(
+                    name = "Malik Malik",
+                    email = "malik@gmail.com",
+                    onClick = {
+                        showGoogleSheet = false
+                        viewModel.register("Malik Malik", "malik@gmail.com", "google-oauth-placeholder-malik") { success, msg ->
+                            if (success) {
+                                Toast.makeText(context, "Logged in as Malik Malik", Toast.LENGTH_SHORT).show()
+                                onBack()
+                            } else {
+                                viewModel.login("malik@gmail.com", "google-oauth-placeholder-malik") { loginSuccess, loginMsg ->
+                                    if (loginSuccess) {
+                                        Toast.makeText(context, "Logged in as Malik Malik", Toast.LENGTH_SHORT).show()
+                                        onBack()
+                                    } else {
+                                        Toast.makeText(context, "Error: $loginMsg", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                GoogleAccountRow(
+                    name = "Basit Basit",
+                    email = "basit@gmail.com",
+                    onClick = {
+                        showGoogleSheet = false
+                        viewModel.register("Basit Basit", "basit@gmail.com", "google-oauth-placeholder-basit") { success, msg ->
+                            if (success) {
+                                Toast.makeText(context, "Logged in as Basit Basit", Toast.LENGTH_SHORT).show()
+                                onBack()
+                            } else {
+                                viewModel.login("basit@gmail.com", "google-oauth-placeholder-basit") { loginSuccess, loginMsg ->
+                                    if (loginSuccess) {
+                                        Toast.makeText(context, "Logged in as Basit Basit", Toast.LENGTH_SHORT).show()
+                                        onBack()
+                                    } else {
+                                        Toast.makeText(context, "Error: $loginMsg", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -162,7 +250,6 @@ fun ProfileDetailsView(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Monogram Avatar Card
         Box(
             modifier = Modifier
                 .size(120.dp)
@@ -276,7 +363,8 @@ fun ProfileRow(label: String, value: String) {
 @Composable
 fun LoginView(
     viewModel: SalahViewModel,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    onGoogleSignInClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -356,13 +444,34 @@ fun LoginView(
                 Text("Sign In", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Divider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+            Text(
+                text = "or",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Divider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        GoogleSignInButton(onClick = onGoogleSignInClick)
     }
 }
 
 @Composable
 fun RegisterView(
     viewModel: SalahViewModel,
-    onRegisterSuccess: () -> Unit
+    onRegisterSuccess: () -> Unit,
+    onGoogleSignInClick: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -468,6 +577,129 @@ fun RegisterView(
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
             } else {
                 Text("Register", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Divider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+            Text(
+                text = "or",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Divider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        GoogleSignInButton(onClick = onGoogleSignInClick)
+    }
+}
+
+@Composable
+fun GoogleSignInButton(
+    onClick: () -> Unit,
+    text: String = "Continue with Google"
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
+        shape = RoundedCornerShape(12.dp),
+        border = ButtonDefaults.outlinedButtonBorder.copy(
+            brush = SolidColor(MaterialTheme.colorScheme.outlineVariant)
+        ),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "G",
+                    color = Color(0xFF4285F4),
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 16.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun GoogleAccountRow(
+    name: String,
+    email: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = name.take(1).uppercase(),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = email,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
             }
         }
     }

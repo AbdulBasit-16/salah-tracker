@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val prefs by salahViewModel.userPreferences.collectAsState()
-            val themeName = prefs?.themeName ?: "FOREST_GREEN"
+            val themeName = prefs?.themeName ?: "MINIMALIST"
 
             SalahTrackerTheme(themeName = themeName) {
                 Surface(

@@ -256,13 +256,36 @@ private val NeonDark = darkColorScheme(
     onSurface = NeonTextDark
 )
 
+// 12. Minimalist (Premium White & Black)
+private val MinimalistLight = lightColorScheme(
+    primary = androidx.compose.ui.graphics.Color(0xFF000000),
+    secondary = androidx.compose.ui.graphics.Color(0xFF333333),
+    tertiary = androidx.compose.ui.graphics.Color(0xFF777777),
+    background = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
+    surface = androidx.compose.ui.graphics.Color(0xFFF7F7F9),
+    onPrimary = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
+    onBackground = androidx.compose.ui.graphics.Color(0xFF000000),
+    onSurface = androidx.compose.ui.graphics.Color(0xFF000000)
+)
+private val MinimalistDark = darkColorScheme(
+    primary = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
+    secondary = androidx.compose.ui.graphics.Color(0xFFCCCCCC),
+    tertiary = androidx.compose.ui.graphics.Color(0xFF8E8E93),
+    background = androidx.compose.ui.graphics.Color(0xFF000000),
+    surface = androidx.compose.ui.graphics.Color(0xFF121212),
+    onPrimary = androidx.compose.ui.graphics.Color(0xFF000000),
+    onBackground = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
+    onSurface = androidx.compose.ui.graphics.Color(0xFFFFFFFF)
+)
+
 @Composable
 fun SalahTrackerTheme(
-    themeName: String = "FOREST_GREEN",
+    themeName: String = "MINIMALIST",
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val colorScheme = when (themeName) {
+        "MINIMALIST" -> if (darkTheme) MinimalistDark else MinimalistLight
         "DEEP_BLUE" -> if (darkTheme) BlueDark else BlueLight
         "OLIVE_GOLD" -> if (darkTheme) OliveDark else OliveLight
         "ROYAL_PURPLE" -> if (darkTheme) PurpleDark else PurpleLight
@@ -273,7 +296,7 @@ fun SalahTrackerTheme(
         "OCEAN_BREEZE" -> if (darkTheme) OceanDark else OceanLight
         "WARM_TERRACOTTA" -> if (darkTheme) TerracottaDark else TerracottaLight
         "NIGHT_NEON" -> if (darkTheme) NeonDark else NeonLight
-        else -> if (darkTheme) ForestDark else ForestLight
+        else -> if (darkTheme) MinimalistDark else MinimalistLight
     }
 
     val view = LocalView.current

@@ -154,6 +154,7 @@ fun SettingsScreen(
                 ) {
                     Text("Theme Palette", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
                     val themes = listOf(
+                        "MINIMALIST" to "Minimalist (Black & White)",
                         "FOREST_GREEN" to "Forest Green (Serene)",
                         "DEEP_BLUE" to "Deep Ocean Blue (Calm)",
                         "OLIVE_GOLD" to "Olive Gold (Warm)",
