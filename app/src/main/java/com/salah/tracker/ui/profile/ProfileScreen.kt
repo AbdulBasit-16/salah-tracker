@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.salah.tracker.data.database.entities.UserPreferences
 import com.salah.tracker.viewmodel.SalahViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +45,8 @@ fun ProfileScreen(
 
     val isSignedIn = prefs.currentUserId != -1L
     var activeTab by remember { mutableStateOf(0) } // 0 = Login, 1 = Signup
-    var showGoogleSheet by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val googleAuthManager = remember { GoogleAuthManager(context) }
 
     Scaffold(
         topBar = {
@@ -130,6 +132,27 @@ fun ProfileScreen(
 
                             Spacer(modifier = Modifier.height(24.dp))
 
+                            val handleGoogleSignIn = {
+                                coroutineScope.launch {
+                                    val result = googleAuthManager.signIn()
+                                    when (result) {
+                                        is GoogleAuthResult.Success -> {
+                                            viewModel.handleGoogleSignIn(result.email, result.displayName) { success, msg ->
+                                                if (success) {
+                                                    Toast.makeText(context, "Signed in as ${result.displayName}", Toast.LENGTH_SHORT).show()
+                                                    onBack()
+                                                } else {
+                                                    Toast.makeText(context, "Error: $msg", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        }
+                                        is GoogleAuthResult.Error -> {
+                                            Toast.makeText(context, "Google Sign-In failed: ${result.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
+                            }
+
                             if (activeTab == 0) {
                                 LoginView(
                                     viewModel = viewModel,
@@ -137,7 +160,7 @@ fun ProfileScreen(
                                         Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
                                         onBack()
                                     },
-                                    onGoogleSignInClick = { showGoogleSheet = true }
+                                    onGoogleSignInClick = { handleGoogleSignIn() }
                                 )
                             } else {
                                 RegisterView(
@@ -146,91 +169,12 @@ fun ProfileScreen(
                                         Toast.makeText(context, "Account created successfully!", Toast.LENGTH_SHORT).show()
                                         onBack()
                                     },
-                                    onGoogleSignInClick = { showGoogleSheet = true }
+                                    onGoogleSignInClick = { handleGoogleSignIn() }
                                 )
                             }
                         }
                     }
                 }
-            }
-        }
-    }
-
-    if (showGoogleSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showGoogleSheet = false },
-            sheetState = rememberModalBottomSheetState(),
-            containerColor = MaterialTheme.colorScheme.surface
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Choose an account",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "to continue to Salah Tracker",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                GoogleAccountRow(
-                    name = "Malik Malik",
-                    email = "malik@gmail.com",
-                    onClick = {
-                        showGoogleSheet = false
-                        viewModel.register("Malik Malik", "malik@gmail.com", "google-oauth-placeholder-malik") { success, msg ->
-                            if (success) {
-                                Toast.makeText(context, "Logged in as Malik Malik", Toast.LENGTH_SHORT).show()
-                                onBack()
-                            } else {
-                                viewModel.login("malik@gmail.com", "google-oauth-placeholder-malik") { loginSuccess, loginMsg ->
-                                    if (loginSuccess) {
-                                        Toast.makeText(context, "Logged in as Malik Malik", Toast.LENGTH_SHORT).show()
-                                        onBack()
-                                    } else {
-                                        Toast.makeText(context, "Error: $loginMsg", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                GoogleAccountRow(
-                    name = "Basit Basit",
-                    email = "basit@gmail.com",
-                    onClick = {
-                        showGoogleSheet = false
-                        viewModel.register("Basit Basit", "basit@gmail.com", "google-oauth-placeholder-basit") { success, msg ->
-                            if (success) {
-                                Toast.makeText(context, "Logged in as Basit Basit", Toast.LENGTH_SHORT).show()
-                                onBack()
-                            } else {
-                                viewModel.login("basit@gmail.com", "google-oauth-placeholder-basit") { loginSuccess, loginMsg ->
-                                    if (loginSuccess) {
-                                        Toast.makeText(context, "Logged in as Basit Basit", Toast.LENGTH_SHORT).show()
-                                        onBack()
-                                    } else {
-                                        Toast.makeText(context, "Error: $loginMsg", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }

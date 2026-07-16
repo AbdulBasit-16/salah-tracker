@@ -312,6 +312,25 @@ class SalahViewModel(private val repository: SalahRepository) : ViewModel() {
         }
     }
 
+    fun handleGoogleSignIn(email: String, displayName: String, onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val existing = repository.getUserByEmail(email)
+                if (existing != null) {
+                    repository.loginUser(existing.id, existing.username)
+                    onResult(true, "Logged in successfully!")
+                } else {
+                    val passwordHash = hashPassword("google_oauth_dummy_password_${email}")
+                    val userId = repository.registerUser(displayName, email, passwordHash)
+                    repository.loginUser(userId, displayName)
+                    onResult(true, "Registration successful!")
+                }
+            } catch (e: Exception) {
+                onResult(false, "Error: ${e.localizedMessage}")
+            }
+        }
+    }
+
     fun logout() {
         viewModelScope.launch {
             repository.logoutUser()
