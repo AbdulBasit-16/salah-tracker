@@ -1,0 +1,54 @@
+{
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cross-Origin-Embedder-Policy",
+            "value": "require-corp"
+          },
+          {
+            "key": "Cross-Origin-Opener-Policy",
+            "value": "same-origin"
+          }
+        ]
+      }
+    ]
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "salahtrackerbybasit",
+          "appId": "1:580119553329:android:71423515150422e6657c10",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "salahtrackerbybasit",
+          "configurations": {
+            "android": "1:580119553329:android:71423515150422e6657c10",
+            "ios": "1:580119553329:ios:ea956d43e77931ed657c10",
+            "macos": "1:580119553329:ios:ea956d43e77931ed657c10",
+            "web": "1:580119553329:web:f10e9beb3622e2e5657c10",
+            "windows": "1:580119553329:web:b56ec2fe99cd1225657c10"
+          }
+        }
+      }
+    }
+  }
+}

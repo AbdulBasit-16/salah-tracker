@@ -1,0 +1,53 @@
+﻿# Deployment script for PeaceMotors Web
+
+# Auto-update version in pubspec.yaml and Dart screens
+$pubspecPath = "$PSScriptRoot/pubspec.yaml"
+if (Test-Path $pubspecPath) {
+    $pubspecContent = Get-Content $pubspecPath -Raw
+    if ($pubspecContent -match 'version:\s*(\d{2}\.\d{2}\.\d{2})\+(\d+)') {
+        $oldVersion = $Matches[0]
+        $oldDate = $Matches[1]
+        $oldBuild = [int]$Matches[2]
+        
+        $currentDate = Get-Date -Format "MM.dd"
+        $newBuild = $oldBuild + 1
+        $newVersion = "$currentDate.$newBuild+$newBuild"
+        
+        Write-Host "🔄 Updating version from $oldDate+$oldBuild to $newVersion..." -ForegroundColor Yellow
+        
+        $pubspecContent = $pubspecContent -replace 'version:\s*\d{2}\.\d{2}\.\d{2}\+\d+', "version: $newVersion"
+        [System.IO.File]::WriteAllText($pubspecPath, $pubspecContent)
+        
+        $dartFiles = @(
+            "lib/screens/welcome_screen.dart",
+            "lib/screens/main_navigation_screen.dart"
+        )
+        
+        foreach ($f in $dartFiles) {
+            $filePath = "$PSScriptRoot/$f"
+            if (Test-Path $filePath) {
+                $content = Get-Content $filePath -Raw
+                $content = $content -replace "Version \d{2}\.\d{2}\.\d{2}(?:\+\d+)?", "Version $newVersion"
+                [System.IO.File]::WriteAllText($filePath, $content)
+                Write-Host "✅ Updated version in $f" -ForegroundColor Green
+            } else {
+                Write-Host "⚠️ File not found: $filePath" -ForegroundColor Red
+            }
+        }
+    } else {
+        Write-Host "⚠️ Could not parse version in pubspec.yaml" -ForegroundColor Red
+    }
+} else {
+    Write-Host "❌ pubspec.yaml not found at $pubspecPath" -ForegroundColor Red
+}
+
+Write-Host "🚀 Starting Web Build..." -ForegroundColor Cyan
+flutter build web --release
+
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✅ Build Successful! Starting Firebase Deployment..." -ForegroundColor Green
+    firebase deploy --only hosting
+} else {
+    Write-Host "❌ Build Failed. Deployment aborted." -ForegroundColor Red
+}
+

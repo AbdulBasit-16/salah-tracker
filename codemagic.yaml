@@ -1,0 +1,43 @@
+workflows:
+  android-play-store:
+    name: Android Release to Play Store
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      groups:
+        # These environment variable groups must be created in CodeMagic UI:
+        # Group 1: 'google_credentials'
+        #   - GCLOUD_SERVICE_ACCOUNT_CREDENTIALS: The base64 encoded JSON key file
+        # Group 2: 'keystore_credentials'
+        #   - KEYSTORE: The base64 encoded keystore (.jks) file
+        #   - KEY_ALIAS: The key alias used to sign the app
+        #   - KEY_PASSWORD: The password for the key
+        #   - STORE_PASSWORD: The password for the keystore
+        - google_credentials
+        - keystore_credentials
+      flutter: default
+    scripts:
+      - name: Set up keystore.properties
+        script: |
+          cd flutter_app/android
+          echo "storePassword=$STORE_PASSWORD" >> keystore.properties
+          echo "keyPassword=$KEY_PASSWORD" >> keystore.properties
+          echo "keyAlias=$KEY_ALIAS" >> keystore.properties
+          echo "storeFile=../keystore.jks" >> keystore.properties
+          echo $KEYSTORE | base64 --decode > ../keystore.jks
+      - name: Get Flutter packages
+        script: |
+          cd flutter_app
+          flutter pub get
+      - name: Build Android App Bundle
+        script: |
+          cd flutter_app
+          flutter build appbundle --release
+    artifacts:
+      - flutter_app/build/app/outputs/bundle/release/app-release.aab
+      - flutter_app/build/app/outputs/flutter-apk/app-release.apk
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal # You can change this to 'production', 'beta', or 'alpha'
+        submit_as_draft: false # Set to false to publish immediately

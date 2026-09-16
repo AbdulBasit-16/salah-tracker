@@ -1,0 +1,144 @@
+﻿
+Running Gradle task 'assembleDebug'...                          
+C:\Users\Malik\.gemini
+\antigravity\scratch\f
+lutter\bin\flutter.bat
+ : Your project is 
+configured with 
+Android NDK 
+23.1.7779620, but the 
+following plugin(s) 
+depend on a different 
+Android NDK version:
+At line:1 char:1
++ C:\Users\Malik\.gemi
+ni\antigravity\scratch
+\flutter\bin\flutter.b
+at bu ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (Your proje   
+ ct is...id NDK ve    
+rsion::String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+- firebase_auth 
+requires Android NDK 
+25.1.8937393
+- firebase_core 
+requires Android NDK 
+25.1.8937393
+- flutter_compass 
+requires Android NDK 
+25.1.8937393
+- geolocator_android 
+requires Android NDK 
+25.1.8937393
+- google_sign_in_andro
+id requires Android 
+NDK 25.1.8937393
+- 
+path_provider_android 
+requires Android NDK 
+25.1.8937393
+- permission_handler_a
+ndroid requires 
+Android NDK 
+25.1.8937393
+- shared_preferences_a
+ndroid requires 
+Android NDK 
+25.1.8937393
+- sqflite_android 
+requires Android NDK 
+25.1.8937393
+Fix this issue by 
+using the highest 
+Android NDK version 
+(they are backward 
+compatible).
+Add the following to C
+:\Users\Malik\.gemini\
+antigravity\scratch\sa
+lah-tracker\flutter_ap
+p\android\app\build.gr
+adle:
+
+    android {
+        ndkVersion = 
+"25.1.8937393"
+        ...
+    }
+
+lib/ui/screens/setting
+s_screen.dart:57:125: 
+Error: No named 
+parameter with the 
+name 'textAlign'.
+                      
+      const 
+Text('Sign in to sync 
+your data across 
+devices.', style: 
+TextStyle(color: 
+Colors.white54, 
+textAlign: 
+TextAlign.center)),
+                      
+                      
+                      
+                      
+  ^^^^^^^^^
+../../flutter/packages
+/flutter/lib/src/paint
+ing/text_style.dart:48
+2:9: Context: Found 
+this candidate, but 
+the arguments don't 
+match.
+  const TextStyle({
+        ^^^^^^^^^
+Target kernel_snapshot
+_program failed: 
+Exception
+
+
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+Execution failed for 
+task ':app:compileFlut
+terBuildDebug'.
+> Process 'command 'C:
+\Users\Malik\.gemini\a
+ntigravity\scratch\flu
+tter\bin\flutter.bat''
+ finished with 
+non-zero exit value 1
+
+* Try:
+> Run with 
+--stacktrace option 
+to get the stack 
+trace.
+> Run with --info or 
+--debug option to get 
+more log output.
+> Run with --scan to 
+get full insights.
+> Get more help at htt
+ps://help.gradle.org.
+
+BUILD FAILED in 5s
+Running Gradle task 'assembleDebug'...                              6.1s
+Gradle task 
+assembleDebug failed 
+with exit code 1

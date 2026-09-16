@@ -1,0 +1,84 @@
+﻿package com.salah.tracker.data.database.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "prayer_logs")
+data class PrayerLog(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val date: String, // format: "yyyy-MM-dd"
+    val prayerName: String, // Fajr, Dhuhr, Asr, Maghrib, Isha, Tahajjud, Sunnah, Nafl
+    val status: String, // Offered On-Time, Offered Late, Missed/Qaza, Excused, Pending
+    val loggedTimestamp: Long? = null
+)
+package com.salah.tracker.data.database.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "qaza_counters")
+data class QazaCounter(
+    @PrimaryKey val prayerName: String, // Fajr, Dhuhr, Asr, Maghrib, Isha
+    val count: Int = 0
+)
+package com.salah.tracker.data.database.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "quran_logs")
+data class QuranLog(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val timestamp: Long,
+    val surah: String,
+    val startAyah: Int,
+    val endAyah: Int,
+    val startPage: Int,
+    val endPage: Int,
+    val pagesRead: Int
+)
+package com.salah.tracker.data.database.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "users")
+data class User(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val username: String,
+    val email: String,
+    val passwordHash: String,
+    val createdAt: Long = System.currentTimeMillis()
+)
+package com.salah.tracker.data.database.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "user_preferences")
+data class UserPreferences(
+    @PrimaryKey val id: Int = 1,
+    val calculationMethod: String = "MWL",
+    val juristicMethod: String = "STANDARD",
+    val themeName: String = "MINIMALIST",
+    val latitude: Double = 21.4225, // Default: Makkah
+    val longitude: Double = 39.8262,
+    val timezoneOffset: Double = 3.0,
+    val fajrNotifEnabled: Boolean = true,
+    val dhuhrNotifEnabled: Boolean = true,
+    val asrNotifEnabled: Boolean = true,
+    val maghribNotifEnabled: Boolean = true,
+    val ishaNotifEnabled: Boolean = true,
+    val missedPrayerRemindersEnabled: Boolean = true,
+    val missedPrayerWindowMinutes: Int = 45,
+    val postSalahRecitationEnabled: Boolean = true,
+    val postSalahDelayMinutes: Int = 15,
+    val lastActiveDate: String = "",
+    val selectedCity: String = "Custom",
+    val quranScript: String = "UTHMANI",
+    val showEnglishTranslation: Boolean = true,
+    val showUrduTranslation: Boolean = true,
+    val hijriAdjustment: Int = 0,
+    val currentUserId: Long = -1L,
+    val currentUsername: String = ""
+)

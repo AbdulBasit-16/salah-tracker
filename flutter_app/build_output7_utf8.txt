@@ -1,0 +1,92 @@
+﻿
+Running Gradle task 'assembleDebug'...                          
+C:\Users\Malik\.gemini
+\antigravity\scratch\f
+lutter\bin\flutter.bat
+ : 
+At line:1 char:1
++ C:\Users\Malik\.gemi
+ni\antigravity\scratch
+\flutter\bin\flutter.b
+at bu ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (:String) [   
+ ], RemoteExceptio    
+n
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+Execution failed for 
+task ':firebase_core:c
+ompileDebugJavaWithJav
+ac'.
+> Could not resolve 
+all files for 
+configuration ':fireba
+se_core:androidJdkImag
+e'.
+   > Failed to 
+transform core-for-sys
+tem-modules.jar to 
+match attributes {arti
+factType=_internal_and
+roid_jdk_image, org.gr
+adle.libraryelements=j
+ar, org.gradle.usage=j
+ava-runtime}.
+      > Execution 
+failed for 
+JdkImageTransform: C:\
+Users\Malik\AppData\Lo
+cal\Android\sdk\platfo
+rms\android-34\core-fo
+r-system-modules.jar.
+         > Error 
+while executing 
+process C:\Program Fil
+es\Java\jdk-21\bin\jli
+nk.exe with arguments 
+{--module-path C:\User
+s\Malik\.gradle\caches
+\transforms-3\14369874
+e559b128db4e4f7dd1f541
+2a\transformed\output\
+temp\jmod 
+--add-modules 
+java.base --output C:\
+Users\Malik\.gradle\ca
+ches\transforms-3\1436
+9874e559b128db4e4f7dd1
+f5412a\transformed\out
+put\jdkImage 
+--disable-plugin 
+system-modules}
+
+* Try:
+> Run with 
+--stacktrace option 
+to get the stack 
+trace.
+> Run with --info or 
+--debug option to get 
+more log output.
+> Run with --scan to 
+get full insights.
+> Get more help at htt
+ps://help.gradle.org.
+
+BUILD FAILED in 5s
+Running Gradle task 'assembleDebug'...                              6.5s
+Gradle task 
+assembleDebug failed 
+with exit code 1

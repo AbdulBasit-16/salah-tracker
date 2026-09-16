@@ -1,0 +1,58 @@
+﻿# PowerShell Script to Build Salah Tracker APK offline using local Gradle setup
+
+$scratchDir = "C:\Users\Malik\.gemini\antigravity\scratch"
+$gradleZip = Join-Path $scratchDir "gradle-8.5-bin.zip"
+$gradleDest = Join-Path $scratchDir "gradle-bin"
+$gradleBin = Join-Path $gradleDest "gradle-8.5\bin\gradle.bat"
+$projectDir = "C:\Users\Malik\.gemini\antigravity\scratch\salah-tracker"
+
+# 1. Download Gradle 8.5 if it doesn't exist
+if (-not (Test-Path $gradleZip)) {
+    Write-Host "Downloading Gradle 8.5 (120MB)... This might take a moment." -ForegroundColor Cyan
+    Invoke-WebRequest -Uri "https://services.gradle.org/distributions/gradle-8.5-bin.zip" -OutFile $gradleZip
+} else {
+    Write-Host "Found cached Gradle 8.5 zip." -ForegroundColor Green
+}
+
+# 2. Extract Gradle if not extracted
+if (-not (Test-Path $gradleDest)) {
+    Write-Host "Extracting Gradle 8.5 to $gradleDest..." -ForegroundColor Cyan
+    New-Item -ItemType Directory -Path $gradleDest -Force | Out-Null
+    Expand-Archive -Path $gradleZip -DestinationPath $gradleDest -Force
+} else {
+    Write-Host "Found extracted Gradle in $gradleDest." -ForegroundColor Green
+}
+
+# 3. Configure Java environment variables (Targeting JDK 21)
+$javaPath = "C:\Program Files\Java\jdk-21"
+if (-not (Test-Path $javaPath)) {
+    $javaPath = "C:\Program Files\Java\jdk-23"
+}
+
+Write-Host "Using Java SDK at: $javaPath" -ForegroundColor Green
+$env:JAVA_HOME = $javaPath
+$env:PATH = "$javaPath\bin;" + $env:PATH
+
+# Configure Android SDK location
+$env:ANDROID_HOME = "C:\Users\Malik\AppData\Local\Android\Sdk"
+
+# 4. Run gradle clean and assembleDebug
+Write-Host "Starting build with Gradle..." -ForegroundColor Cyan
+Set-Location -Path $projectDir
+
+# Execute compilation
+& $gradleBin clean assembleDebug
+
+# 5. Check build result and copy APK
+$apkPath = Join-Path $projectDir "app\build\outputs\apk\debug\app-debug.apk"
+$targetApk = Join-Path $projectDir "salah-tracker-debug.apk"
+
+if (Test-Path $apkPath) {
+    Copy-Item -Path $apkPath -Destination $targetApk -Force
+    Write-Host "`n==================================================" -ForegroundColor Green
+    Write-Host "Build Successful!" -ForegroundColor Green
+    Write-Host "Debug APK copied to: $targetApk" -ForegroundColor Yellow
+    Write-Host "==================================================" -ForegroundColor Green
+} else {
+    Write-Host "`nBuild Failed. Please check compile logs above." -ForegroundColor Red
+}

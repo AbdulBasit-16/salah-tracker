@@ -1,0 +1,134 @@
+﻿
+Running Gradle task 'assembleDebug'...                          
+C:\Users\Malik\.gemini
+\antigravity\scratch\f
+lutter\bin\flutter.bat
+ : C:\Users\Malik\.gem
+ini\antigravity\scratc
+h\salah-tracker\flutte
+r_app\android\app\src\
+debug\AndroidManifest.
+xml Error:
+At line:1 char:1
++ C:\Users\Malik\.gemi
+ni\antigravity\scratch
+\flutter\bin\flutter.b
+at bu ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (C:\Users\M   
+ alik\...fest.xml     
+Error::String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+	uses-sdk:minSdkVersio
+n 21 cannot be 
+smaller than version 
+23 declared in 
+library 
+[:firebase_auth] C:\Us
+ers\Malik\.gemini\anti
+gravity\scratch\salah-
+tracker\flutter_app\bu
+ild\firebase_auth\inte
+rmediates\merged_manif
+est\debug\AndroidManif
+est.xml as the 
+library might be 
+using APIs not 
+available in 21
+	Suggestion: use a 
+compatible library 
+with a minSdk of at 
+most 21,
+		or increase this 
+project's minSdk 
+version to at least 
+23,
+		or use tools:overrid
+eLibrary="io.flutter.p
+lugins.firebase.auth" 
+to force usage (may 
+lead to runtime 
+failures)
+
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+Execution failed for 
+task ':app:processDebu
+gMainManifest'.
+> Manifest merger 
+failed : uses-sdk:minS
+dkVersion 21 cannot 
+be smaller than 
+version 23 declared 
+in library 
+[:firebase_auth] C:\Us
+ers\Malik\.gemini\anti
+gravity\scratch\salah-
+tracker\flutter_app\bu
+ild\firebase_auth\inte
+rmediates\merged_manif
+est\debug\AndroidManif
+est.xml as the 
+library might be 
+using APIs not 
+available in 21
+  	Suggestion: use a 
+compatible library 
+with a minSdk of at 
+most 21,
+  		or increase this 
+project's minSdk 
+version to at least 
+23,
+  		or use tools:overr
+ideLibrary="io.flutter
+.plugins.firebase.auth
+" to force usage (may 
+lead to runtime 
+failures)
+
+* Try:
+> Run with 
+--stacktrace option 
+to get the stack 
+trace.
+> Run with --info or 
+--debug option to get 
+more log output.
+> Run with --scan to 
+get full insights.
+> Get more help at htt
+ps://help.gradle.org.
+
+BUILD FAILED in 10s
+Running Gradle task 'assembleDebug'...                             10.8s
+
+ΓöîΓöÇ Flutter Fix ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé The plugin firebase_auth requires a higher Android SDK version.                                Γöé
+Γöé Fix this issue by adding the following to the file                                             Γöé
+Γöé C:\Users\Malik\.gemini\antigravity\scratch\salah-tracker\flutter_app\android\app\build.gradle: Γöé
+Γöé android {                                                                                      Γöé
+Γöé   defaultConfig {                                                                              Γöé
+Γöé     minSdkVersion 23                                                                           Γöé
+Γöé   }                                                                                            Γöé
+Γöé }                                                                                              Γöé
+Γöé                                                                                                Γöé
+Γöé Following this change, your app will not be available to users running Android SDKs below 23.  Γöé
+Γöé Consider searching for a version of this plugin that supports these lower versions of the      Γöé
+Γöé Android SDK instead.                                                                           Γöé
+Γöé For more information, see: https://flutter.dev/to/review-gradle-config                         Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+Gradle task 
+assembleDebug failed 
+with exit code 1

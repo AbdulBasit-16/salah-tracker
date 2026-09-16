@@ -1,0 +1,62 @@
+﻿
+Running Gradle task 'assembleDebug'...                          
+C:\Users\Malik\.gemini
+\antigravity\scratch\f
+lutter\bin\flutter.bat
+ : 
+At line:1 char:1
++ C:\Users\Malik\.gemi
+ni\antigravity\scratch
+\flutter\bin\flutter.b
+at bu ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (:String) [   
+ ], RemoteExceptio    
+n
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+FAILURE: Build failed 
+with an exception.
+
+* Where:
+Build file 'C:\Users\M
+alik\.gemini\antigravi
+ty\scratch\salah-track
+er\flutter_app\android
+\build.gradle' line: 
+22
+
+* What went wrong:
+A problem occurred 
+evaluating root 
+project 'android'.
+> Cannot run Project.a
+fterEvaluate(Closure) 
+when the project is 
+already evaluated.
+
+* Try:
+> Run with 
+--stacktrace option 
+to get the stack 
+trace.
+> Run with --info or 
+--debug option to get 
+more log output.
+> Run with --scan to 
+get full insights.
+> Get more help at htt
+ps://help.gradle.org.
+
+BUILD FAILED in 1s
+Running Gradle task 'assembleDebug'...                           2,068ms
+Gradle task 
+assembleDebug failed 
+with exit code 1

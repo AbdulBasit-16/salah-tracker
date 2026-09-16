@@ -1,0 +1,82 @@
+﻿
+Running Gradle task 'assembleDebug'...                          
+C:\Users\Malik\.gemini
+\antigravity\scratch\f
+lutter\bin\flutter.bat
+ : ../../../../../AppD
+ata/Local/Pub/Cache/ho
+sted/pub.dev/geolocato
+r_android-5.0.3/lib/sr
+c/types/foreground_set
+tings.dart:122:23: 
+Error: The method 
+'toARGB32' isn't 
+defined for the class 
+'Color'.
+At line:1 char:1
++ C:\Users\Malik\.gemi
+ni\antigravity\scratch
+\flutter\bin\flutter.b
+at bu ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (../../../.   
+ ./../... class 'C    
+olor'.:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+ - 'Color' is from 
+'dart:ui'.
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 'toARGB32'.
+      'color': 
+color?.toARGB32(),
+                      
+^^^^^^^^
+Target kernel_snapshot
+_program failed: 
+Exception
+
+
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+Execution failed for 
+task ':app:compileFlut
+terBuildDebug'.
+> Process 'command 'C:
+\Users\Malik\.gemini\a
+ntigravity\scratch\flu
+tter\bin\flutter.bat''
+ finished with 
+non-zero exit value 1
+
+* Try:
+> Run with 
+--stacktrace option 
+to get the stack 
+trace.
+> Run with --info or 
+--debug option to get 
+more log output.
+> Run with --scan to 
+get full insights.
+> Get more help at htt
+ps://help.gradle.org.
+
+BUILD FAILED in 5s
+Running Gradle task 'assembleDebug'...                              6.0s
+Gradle task 
+assembleDebug failed 
+with exit code 1

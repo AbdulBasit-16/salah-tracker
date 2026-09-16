@@ -1,0 +1,5 @@
+﻿sdk.dir=C:\\Users\\Malik\\AppData\\Local\\Android\\Sdk
+flutter.sdk=C:\\Users\\Malik\\.gemini\\antigravity\\scratch\\flutter
+flutter.buildMode=debug
+flutter.versionName=08.20.11
+flutter.versionCode=11
