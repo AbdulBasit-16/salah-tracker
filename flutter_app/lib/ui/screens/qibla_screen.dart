@@ -42,8 +42,20 @@ class _QiblaScreenState extends State<QiblaScreen> {
   Future<void> _getLocationAndCalculateQibla() async {
     setState(() => _isLoadingLocation = true);
     try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.medium,
+          timeLimit: const Duration(seconds: 5),
+        );
+      } catch (e) {
+        position = await Geolocator.getLastKnownPosition();
+      }
+      
+      if (position == null) {
+        if (mounted) setState(() => _isLoadingLocation = false);
+        return;
+      }
       
       // Makkah coordinates
       const double makkahLat = 21.422487;
@@ -73,7 +85,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         title: const Text('Qibla Compass', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF121212),
         elevation: 0,
         centerTitle: true,
       ),

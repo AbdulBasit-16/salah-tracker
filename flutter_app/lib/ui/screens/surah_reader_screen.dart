@@ -36,7 +36,7 @@ class _SurahReaderScreenState extends State<SurahReaderScreen> {
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         title: Text(widget.surah.nameEnglish, style: const TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF121212),
         elevation: 0,
         actions: [
           IconButton(

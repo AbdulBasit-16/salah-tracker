@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
+import 'package:hijri/hijri_calendar.dart';
 import '../../providers/salah_provider.dart';
 import '../../data/models/prayer_log.dart';
 
@@ -13,7 +14,7 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF121212),
         elevation: 0,
         title: Consumer<SalahProvider>(
           builder: (context, provider, child) {
@@ -91,7 +92,12 @@ class DashboardScreen extends StatelessWidget {
                         color: const Color(0xFF3A9AD9).withOpacity(0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text("7 Rabi' I 1448 AH", style: TextStyle(color: Color(0xFF3A9AD9), fontWeight: FontWeight.bold)),
+                      child: Builder(
+                        builder: (context) {
+                          final hDate = HijriCalendar.fromDate(provider.currentDate);
+                          return Text("${hDate.hDay} ${hDate.getLongMonthName()} ${hDate.hYear} AH", style: const TextStyle(color: Color(0xFF3A9AD9), fontWeight: FontWeight.bold));
+                        }
+                      ),
                     ),
                   ],
                 ),

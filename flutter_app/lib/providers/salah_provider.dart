@@ -67,7 +67,34 @@ class SalahProvider extends ChangeNotifier {
     final prefs = await _dbHelper.getUserPreferences();
     if (prefs != null) {
       _userPreferences = prefs;
+      if (_userPreferences.timezoneOffset == 3.0 && _userPreferences.latitude == 21.4225) {
+        _userPreferences = UserPreferences(
+          id: _userPreferences.id,
+          calculationMethod: _userPreferences.calculationMethod,
+          juristicMethod: _userPreferences.juristicMethod,
+          latitude: _userPreferences.latitude,
+          longitude: _userPreferences.longitude,
+          timezoneOffset: DateTime.now().timeZoneOffset.inMinutes / 60.0,
+          selectedCity: _userPreferences.selectedCity,
+          fajrNotifEnabled: _userPreferences.fajrNotifEnabled,
+          dhuhrNotifEnabled: _userPreferences.dhuhrNotifEnabled,
+          asrNotifEnabled: _userPreferences.asrNotifEnabled,
+          maghribNotifEnabled: _userPreferences.maghribNotifEnabled,
+          ishaNotifEnabled: _userPreferences.ishaNotifEnabled,
+          missedPrayerRemindersEnabled: _userPreferences.missedPrayerRemindersEnabled,
+          postSalahRecitationEnabled: _userPreferences.postSalahRecitationEnabled,
+          themeName: _userPreferences.themeName,
+          quranScript: _userPreferences.quranScript,
+          showEnglishTranslation: _userPreferences.showEnglishTranslation,
+          showUrduTranslation: _userPreferences.showUrduTranslation,
+          hijriAdjustment: _userPreferences.hijriAdjustment,
+          lastActiveDate: _userPreferences.lastActiveDate,
+        );
+      }
     } else {
+      _userPreferences = UserPreferences(
+        timezoneOffset: DateTime.now().timeZoneOffset.inMinutes / 60.0,
+      );
       await _dbHelper.updateUserPreferences(_userPreferences);
     }
     notifyListeners();
@@ -147,7 +174,7 @@ class SalahProvider extends ChangeNotifier {
           juristicMethod: _userPreferences.juristicMethod,
           latitude: position.latitude,
           longitude: position.longitude,
-          timezoneOffset: _userPreferences.timezoneOffset,
+          timezoneOffset: DateTime.now().timeZoneOffset.inMinutes / 60.0,
           selectedCity: city,
           fajrNotifEnabled: _userPreferences.fajrNotifEnabled,
           dhuhrNotifEnabled: _userPreferences.dhuhrNotifEnabled,
