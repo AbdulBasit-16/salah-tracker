@@ -3,6 +3,13 @@ workflows:
     name: Android Release to Play Store
     max_build_duration: 60
     instance_type: mac_mini_m2
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
     environment:
       groups:
         # These environment variable groups must be created in CodeMagic UI:
